@@ -169,6 +169,7 @@ void net_vehicle(){
     device_init_ip_settings2.gateway.ip.v4=(uint32_t)d1;
     device_init_ip_settings2.netmask.ip.v4=(uint32_t)d2;
     device_init_ip_settings2.ip_address.ip.v4=(uint32_t)d3;
+
     /* Bring up the network interface */
       wiced_result_t result;
 
@@ -197,8 +198,9 @@ void net_vehicle(){
           wiced_network_set_hostname(V_h);    /* Host name */
 
           result_ip = wiced_ip_up( interface, WICED_USE_EXTERNAL_DHCP_SERVER, &device_init_ip_settings2 );
+          //result_ip = wiced_ip_up( interface, WICED_USE_STATIC_IP, &device_init_ip_settings2 );
           if((result_ip==WICED_SUCCESS)){
-              //printf("\n ** Asignacion de IP correcta ** \n");
+              printf("\n ** Asignacion de IP correcta ** \n");
               ip_is_up=true;
               //break;
           }
@@ -243,8 +245,6 @@ void net_vehicle(){
 
 //      wiced_rtos_create_thread(&publishThreadHandle, THREAD_BASE_PRIORITY+1, NULL, publishThread, THREAD_STACK_SIZE, NULL);
 //      wiced_rtos_create_thread(&publishThreadHandle, THREAD_BASE_PRIORITY+1, NULL, tcp_client, THREAD_STACK_SIZE, NULL);
-
-
 }
 
 
@@ -301,13 +301,12 @@ void collision_event_log(wiced_thread_arg_t arg){
 
 
 void net_config(){
-
+    printf("\n ---------> net_config \n");
     /* Bring up the network interface */
     wiced_result_t result;
 
-
-    Set_SSID(SIID_C,sizeof(SIID_C),WICED_UART_1);
-    Set_KEY(PASS_C,sizeof(PASS_C),WICED_UART_1);
+    //Set_SSID(SIID_C,sizeof(SIID_C),WICED_UART_1);
+    //Set_KEY(PASS_C,sizeof(PASS_C),WICED_UART_1);
 
     WPRINT_APP_INFO( ("Net config\r\n") );
     //      result = wiced_network_up(WICED_CONFIG_INTERFACE, WICED_USE_EXTERNAL_DHCP_SERVER,&device_init_settings);
@@ -321,8 +320,6 @@ void net_config(){
                 {
                     result=wiced_join_ap_specific( &ap->details, ap->security_key_length, ap->security_key );
                     wiced_dct_read_unlock( (wiced_config_ap_entry_t*) ap, WICED_FALSE );
-
-
                 }
         if ( result == WICED_SUCCESS )
         {
@@ -334,7 +331,6 @@ void net_config(){
     result = wiced_ip_up( interface, WICED_USE_EXTERNAL_DHCP_SERVER, &device_init_settings );
 
 
-
     /* Create a TCP socket */
     if ( wiced_tcp_create_socket( &tcp_client_socket, interface ) != WICED_SUCCESS )
     {
@@ -343,6 +339,7 @@ void net_config(){
     /* Bind to the socket */
     wiced_tcp_bind( &tcp_client_socket, TCP_SERVER_PORT_c );
     /* Register a function to send TCP packets */
+    //printf("\n ---------> Go to event \n");
     wiced_rtos_register_timed_event( &tcp_client_event, WICED_NETWORKING_WORKER_THREAD, &tcp_client_config, TCP_CLIENT_INTERVAL_c, 0 );
 
 

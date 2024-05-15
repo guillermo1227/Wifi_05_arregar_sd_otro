@@ -109,13 +109,13 @@ uint8_t get_gpio_menssage(int index){
                break;
        }
 
-    res=wiced_dct_write( (const void*) app_dct, DCT_APP_SECTION, 0, sizeof(dct_read_write_app_dct_t) );
-    if(res==WICED_SUCCESS){
-          // wiced_uart_transmit_bytes( WICED_UART_1, OK, sizeof( OK ) - 1 );
-       }
-       else{
-         //  wiced_uart_transmit_bytes( WICED_UART_1, NOT, sizeof( NOT ) - 1 );
-       }
+//    res=wiced_dct_write( (const void*) app_dct, DCT_APP_SECTION, 0, sizeof(dct_read_write_app_dct_t) );
+//    if(res==WICED_SUCCESS){
+//          // wiced_uart_transmit_bytes( WICED_UART_1, OK, sizeof( OK ) - 1 );
+//       }
+//       else{
+//         //  wiced_uart_transmit_bytes( WICED_UART_1, NOT, sizeof( NOT ) - 1 );
+//       }
     /* release the read lock */
     wiced_dct_read_unlock( app_dct, WICED_FALSE);
 

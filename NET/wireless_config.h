@@ -88,8 +88,8 @@ wiced_result_t tcp_client_config( void* arg )
             WPRINT_APP_INFO(("Unable to connect to the server! Halt.\n"));
             try_n=try_n+1;
             if(try_n==250){
+                printf("\n Reseteo 1 \n");
                 wiced_framework_reboot();
-
             }
             wiced_uart_transmit_bytes(WICED_UART_1,TCP_CONNECT_FAILED,sizeof(TCP_CONNECT_FAILED)-1);
             return WICED_ERROR;
@@ -101,6 +101,7 @@ wiced_result_t tcp_client_config( void* arg )
              WPRINT_APP_INFO(("TCP packet creation failed\n"));
              try_n=try_n+1;
              if(try_n==250){
+                 printf("\n Reseteo 2 \n");
                  wiced_framework_reboot();
 
              }
@@ -171,9 +172,11 @@ wiced_result_t tcp_client_config( void* arg )
 }
 
 void select_net(uint8_t* message1,uint8_t thread1 ){
+    printf("\n Select net ------------> \n");
     char* res;
     uint8_t str_r[3];
     strncpy(str_r,message1,3);
+    printf("\n Esto vale str_r :%s \n",str_r);
        res = strstr(message1,"Starting_Config");  //Bandera para dar incio a la configuracion de red
        if(res){
             status_config=1;

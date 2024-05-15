@@ -46,7 +46,7 @@ static wiced_timed_event_t Beacon_guardian;
 static wiced_timed_event_t Geo_guardian;
 
 static wiced_timed_event_t Collision_guardian;
-
+static wiced_timed_event_t Pantalla_guardian;   /* Watchdog */
 
 static wiced_result_t guardian_v( void );
 static wiced_result_t guardian_V2( void );
@@ -66,7 +66,9 @@ static wiced_result_t Beacon_V( void );
 static wiced_result_t Collision_V( void );
 static wiced_result_t Acarreo_V( void );
 
-
+static wiced_result_t Pantalla_T( void );   /* Watchdog */
+void start_whatchdog_LCD(void);      /* Watchdog */
+extern void screen_checker(void);           /* Watchdog */
 
 void collision_event_log(wiced_thread_arg_t arg);
 void SearchWifi(wiced_thread_arg_t arg);
@@ -100,6 +102,11 @@ void init_all_timer(){
 
 }
 
+start_whatchdog_LCD(void)   /* Watchdog */
+{
+    //wiced_uart_transmit_bytes(WICED_UART_1,"Init timer\n", strlen("Init timer\n"));
+    wiced_rtos_register_timed_event( &Pantalla_guardian, WICED_NETWORKING_WORKER_THREAD, &Pantalla_T,4000, 0 );   /* Verificar el funcionamiento de la pantalla */
+}
 
 static wiced_result_t Acarreo_V( void ){
 
@@ -114,7 +121,7 @@ static wiced_result_t Acarreo_V( void ){
 
 //
 //            memset(id_count,'1',2);
-    if(strlen(log_accarreos.mac_bt)!=0){
+    if(strlen(log_accarreos.mac_bt)!=0){  /* Si se ingreso una mac entra aqui */
         wiced_filesystem_unmount(&fs_handle);
         init_sd(&fs_handle);
 
@@ -155,11 +162,6 @@ static wiced_result_t Acarreo_V( void ){
     }
     printf("\t%d\t%d\n",Product_f,GEOSF_F);
     GEOSF_F=WICED_FALSE;
-
-
-
-
-
 
 }
 
@@ -286,9 +288,11 @@ static wiced_result_t Beacon_V( void ){
             }
         }
         count_save=1;
-        if(count_beacon<buff_aux){
+        if(count_beacon<buff_aux){  /* Que pasa cuando count_beacon es mayo a 100, si encotro */
             count_beacon=1;
         }
+//        else                  // --- Agregado por mi
+//            count_beacon=1;   // --- Agregado por mi
     }
     count_save=count_save+1;
 
@@ -344,11 +348,7 @@ static wiced_result_t guardian_v( void ){
 //
 //    WPRINT_APP_INFO( ("FRIST LAMP %d \r\n",first_seen_lm) );
 //    WPRINT_APP_INFO( ("FRIST VEHC %d \r\n",first_seen_vh) );
-//
-
-
-
-    }
+}
 
 static wiced_result_t guardian_V2( void ){
 
@@ -387,6 +387,7 @@ static wiced_result_t guardian_V2( void ){
 
 
 void Time_reboot(void* arg){
+    printf("\n Timer de reseteo \n");
     wiced_bool_t upnet=WICED_FALSE;
 //                     c_down_net=c_down_net+1;
 //    WPRINT_APP_INFO( ("down %d \r\n",c_down_net) );
@@ -394,7 +395,7 @@ void Time_reboot(void* arg){
      if(main_c==3){
          upnet=wiced_network_is_up(WICED_STA_INTERFACE);
          if(upnet==WICED_FALSE){
-                 WPRINT_APP_INFO( ("leave %d \r\n",c_down_net) );
+                 WPRINT_APP_INFO( ("leave %d \r\n",c_down_net) );    /*<---- Reconexion -----> */
                  c_down_net=c_down_net+1;
              if(c_down_net==7200){
                  wiced_framework_reboot();
@@ -452,12 +453,17 @@ void Time_reboot(void* arg){
      }
 
 
-     if((tcp_down_connect==WICED_TRUE)&&(reg_incoming==WICED_FALSE)){
-
-         wiced_framework_reboot();
+     if((tcp_down_connect==WICED_TRUE)&&(reg_incoming==WICED_FALSE)){   /* El reg_incoming es usado para primero salvar la informacion */
+                                                                        /* Y despues reinciarce el dispositivo */
+         //wiced_framework_reboot();  Estaba descomentado para reiniciarce
      }
 
 }
 
+/* Check the state of the LCD screen */
+static wiced_result_t Pantalla_T( void )
+{
+    screen_checker();
+}
 
 #endif  /* stdbool.h */

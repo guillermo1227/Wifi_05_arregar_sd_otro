@@ -47,7 +47,7 @@ uint8_t coun;
 #define TCP_CLIENT_RECEIVE_TIMEOUT_LAMP        3000
 
 #define TCP_CONNECTION_NUMBER_OF_RETRIES  6
-#define TCP_DOWN_NUMBER                   22  //60
+#define TCP_DOWN_NUMBER                   42  //60
 #define TCP_CLIENT_STACK_SIZE   (10000)
 
 #define SIID_C "-SSF-HARDWARE"
@@ -85,6 +85,8 @@ uint8_t try_n=1;
 char data_out[1000];
 char bt_msm[50];
 int data_send_bt;
+
+wiced_bool_t Data_B_in=WICED_FALSE;
 
 const char s[2] = "\n";
 char *token;
@@ -374,7 +376,7 @@ void publishThread(wiced_thread_arg_t arg)
                   if(s_count_x!=0){
                       WPRINT_APP_INFO( (">> es igual a %d en %s\n\n\n",s_count_x,mac_ap) );
 
-                      for(int f=0;f<data_send_bt;f++){
+                      for(int f=0;f<data_send_bt;f++){  /* Supongamos que data_b_send == 100 */
                           if(f==0){
       //                    sprintf(data_out,"\nV;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get(&i2c_rtc));
                               sprintf(data_out,"\nH;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
@@ -448,14 +450,11 @@ void publishThread(wiced_thread_arg_t arg)
 
     }
 }
+
 void data_bt_send(unsigned char* buffer_in ){
-
-
+    Data_B_in = WICED_FALSE;
     unsigned char str_switch[4];
        unsigned char str_split[128];
-       unsigned char pem_mac[17];
-       unsigned char str_temp[17];
-
 
        strncpy(str_switch,buffer_in,4);
        strcpy(str_split,&buffer_in[4]);
@@ -470,70 +469,76 @@ void data_bt_send(unsigned char* buffer_in ){
            else if(s_count_x<limit_data){
 
                unsigned char *cvl1 = strtok(str_split, delim);
-               while(cvl1 != NULL){
-   //                WPRINT_APP_INFO( ("strtok -> %s \r\n",cvl1) );
-   //                strcpy(pem_mac,cvl1);
-   //                WPRINT_APP_INFO( ("memecpy -> %s \r\n",pem_mac) );
+               while(cvl1 != NULL)
+               {
                    switch (x) {
-                       case 0:
-                           memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
+                   case 0:
+                       //memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);  /* Copia la mac sin importar de que sea */
+                       memcpy(data_B.mac_bt,cvl1,17);
                        break;
-                       case 1:
-                           if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHC"))){
-                               strcpy(data_btt[s_count_x+1].type,"LAMP");
-                           }
-                           else if(strstr(buffer_in,"BEAC")){
-                               strcpy(data_btt[s_count_x+1].type,"BEAC");
-                               GEOSF_F=WICED_TRUE;
-
-                           }
-                           else{
-                               strcpy(data_btt[s_count_x+1].type,"BEAC");
-                           }
-                           break;
-                       case 2:
-                           strcpy(data_btt[s_count_x+1].rssi,cvl1);
-                           break;
-                       case 3:
-                           strcpy(data_btt[s_count_x+1].fallen,cvl1);
-                           break;
-                       default:
-                           break;
+                   case 1:
+                       if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHI"))){
+                           strcpy(data_btt[s_count_x+1].type,"LAMP");
+                           //strcpy(data_B.type,"LAMP");
+                       }
+                       else if(strstr(buffer_in,"BEAC")){
+                           strcpy(data_btt[s_count_x+1].type,"BEAC");
+                           //strcpy(data_B.type,"BEAC");
+                           GEOSF_F=WICED_TRUE;
+                           //printf("\n **** BEACON ACARO **** \n");
+                       }
+                       else{
+                           strcpy(data_btt[s_count_x+1].type,"BEAC"); //GEOSF y lo restante
+                           //strcpy(data_B.type,"BEAC");
+                       }
+                       break;
+                   case 2:
+                       //strcpy(data_btt[s_count_x+1].rssi,cvl1);
+                       strcpy(data_B.rssi,cvl1);
+                       break;
+                   case 3:
+                       //strcpy(data_btt[s_count_x+1].fallen,cvl1);
+                       strcpy(data_B.fallen,cvl1);
+                       break;
+                   default:
+                       break;
                    }
                    x++;
                    cvl1=strtok(NULL, delim);
                }
+               /* Guardado solo si no se tiene en la estrcutra, si esta guardado solo se actualiza su RSSI */
+               int in_v=0;
+               for(int i=0; i<s_count_x;i++)
+               {
+                   if(strstr(data_btt[i+1].mac_bt,data_B.mac_bt))
+                   {
+                       Data_B_in = WICED_TRUE;
+                       in_v = i+1;     /* Keep the position that was detect */
+                       break;
+                   }
+               }
+               if(Data_B_in == WICED_FALSE)    /* Save vehicule mac */
+               {
+                   //memcpy(data_btt[s_count_x+1].type,data_B.type,4);
+                   memcpy(data_btt[s_count_x+1].rssi,data_B.rssi,4); /* Only update the RSSI value */
+                   memcpy(data_btt[s_count_x+1].mac_bt,data_B.mac_bt,17);
+                   s_count_x++;
+                   data_send_bt=s_count_x;
+               }
+               else
+               {
+                   sprintf(data_btt[in_v].rssi,"R%s",data_B.rssi);
+                   //memcpy(data_btt[in_v].rssi,data_B.rssi,4); /* Only update the RSSI value */
+               }
+               /* ****************** */
                x=0;
-               s_count_x++;
-               data_send_bt=s_count_x;
+//               s_count_x++;
+//               data_send_bt=s_count_x;
            }
-
-
-
-
-//        unsigned char *cvl1 = strtok(str_split, delim);
-//        while(cvl1 != NULL){
-//            switch (x) {
-//                case 0:
-//                break;
-//                case 1:
-//                    strcpy(str_temp,cvl1);
-//                    if((strcmp(str_temp,"BEAC")==0)){
-////                        WPRINT_APP_INFO( ("name:=> %s\r\n",str_temp) );
-//                        _B_transit=WICED_TRUE;
-//                    }
-//                    break;
-//                case 2:
-//
-//                    break;
-//                default:
-//                    break;
-//            }
-//            x++;
-//            cvl1=strtok(NULL, delim);
-//        }
-
-
+           memset(data_B.mac_bt,NULL,17);
+           memset(data_B.type,NULL,17);
+           memset(data_B.rssi,NULL,4);
+           memset(data_B.fallen,NULL,2);
     }
 
     wiced_rtos_set_semaphore(&displaySemaphore);

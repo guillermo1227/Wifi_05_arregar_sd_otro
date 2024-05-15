@@ -148,7 +148,7 @@ void tamagochi(char *input,struct Acarreos *acareo){
             {
             case 0:
                 /* code */
-//                         printf("mmmm%s\n",second_split);
+                         printf("mmmm%s\n",second_split);
 
                 memcpy(acareo->mac_bt,second_split,strlen(second_split));
                 acareo->mac_bt[strlen(second_split)]='\0';

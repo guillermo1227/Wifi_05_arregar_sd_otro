@@ -60,7 +60,7 @@ typedef struct data_in
 }dataa;
 
 struct data_in data_btt [100+10];
-
+struct data_in data_B;
 
 typedef struct
 {
@@ -182,13 +182,13 @@ void main_uart(wiced_thread_arg_t arg){
 //                    wiced_uart_transmit_bytes( WICED_UART_1, uart3, strlen(uart3));
 
                     lcd_data_update(rx_buffer3,&count_v,&count_l,&proximity);
-                    lcd_fallen_update(rx_buffer3,&lcd_fallen);
+                    lcd_fallen_update(rx_buffer3,&lcd_fallen);      //Aqui si llega BNM y BEAC ---> _B_transit=WICED_TRUE; si fal==1 ---> fallen_f=WICED_TRUE;
 //                    SEND_OTA(rx_buffer3);
                     data_file_write(rx_buffer3);
 //                    get_join_macbt(rx_buffer3);
 //                    collision_event_macbt(rx_buffer3);
 //                    collision_event_beacon(rx_buffer3);
-                    data_bt_send(rx_buffer3);
+                    data_bt_send(rx_buffer3);  /* Donde forma la trama B; */
 
                     tamagochi(rx_buffer3,&log_accarreos);
 //                    limit_log=id_revived(rx_buffer3);
@@ -248,7 +248,7 @@ void data_file_write(unsigned char* buffer_in ){
     char delim[2] = ",";
     int x=0;
 
-    if((strstr(buffer_in,"BNM|"))&&((strstr(buffer_in,"GEOSF")))&&((strstr(buffer_in,"LAMP"))==NULL)&&((strstr(buffer_in,"VEHC"))==NULL)){
+    if((strstr(buffer_in,"BNM|"))&&((strstr(buffer_in,"GEOSF")))&&((strstr(buffer_in,"LAMP"))==NULL)&&((strstr(buffer_in,"VEHI"))==NULL)){
         _B_transit=WICED_TRUE;
         unsigned char *cvl_1 = strtok(str_split, "|");
         cvl_1=strtok(NULL, "|");
@@ -262,19 +262,19 @@ void data_file_write(unsigned char* buffer_in ){
             switch (x) {
                 case 0:
 //                        memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-                    if((strlen(cvl1)>=filter_size)&&(count_char(cvl1,':')==5)){
+                    if((strlen(cvl1)>=filter_size)&&(count_char(cvl1,':')==5)){  //Tamaño mayor a 15, y si hay 5 : ocalizados en la cadena
                         for(int b=0;b<buff_aux;b++){
-                            if(!(strstr(AUX_BEACON[b].mac_bt,cvl1))){
+                            if(!(strstr(AUX_BEACON[b].mac_bt,cvl1))){ /* No esta aqui */
 //                                AUX_BEACON[b].flag=0;
 //                                printf("no existe \n");
 //                                wirte=WICED_FALSE;
 
                             }
-                            else{
+                            else{                            /* Si esta la cadena */
                                 AUX_BEACON[b].flag=1;
 
                                 printf("si existe \n");
-                                if(strlen(AUX_BEACON[b].time_start)!=0){
+                                if(strlen(AUX_BEACON[b].time_start)!=0){ /* Si ya tiene registro de entrada, se pone el registro de salida */
                                     strcpy(AUX_BEACON[b].time_end,time_get(&i2c_rtc));
                                     printf("OK end\n");
 
@@ -283,14 +283,14 @@ void data_file_write(unsigned char* buffer_in ){
                                 wirte1=WICED_TRUE;
                             }
                         }
-                        if(wirte1==WICED_FALSE){
+                        if(wirte1==WICED_FALSE){  /* No esta, guardamos la mac de beacon */
                             wirte1=WICED_TRUE;
-                            printf("escribe %d\n",count_beacon);
+                            printf("\n Variable para flujo de lo guardado de GEOSF %d\n",count_beacon);
                             if(count_beacon<buff_aux){
                                 memcpy(AUX_BEACON[count_beacon].mac_bt,cvl1,17);
                                 if(strlen(AUX_BEACON[count_beacon].time_start)<1){
                                     strcpy(AUX_BEACON[count_beacon].time_start,time_get(&i2c_rtc));
-                                    printf("OK\n");
+                                    printf("OK BEAC GEOSF\n");
                                 }
                                 count_beacon=count_beacon+1;
                             }
