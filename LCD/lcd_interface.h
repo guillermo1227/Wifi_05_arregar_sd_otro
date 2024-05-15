@@ -268,20 +268,20 @@ void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,cha
 
          u8g_DrawBox(u8g, 63,9,3,3);
      }
-//     else{
-//         u8g_DrawLine(u8g, 52,0,76,10);
-//         u8g_DrawLine(u8g, 52,10,76,0);
-//
-//         u8g_SetFont(u8g, u8g_font_gdr10);
-//         u8g_SetFontPosTop(u8g);
-//         u8g_DrawLine(u8g, 57,0,71,0);
-//         u8g_DrawLine(u8g, 52,3,57,0);
-//         u8g_DrawLine(u8g, 76,3,71,0);
-//         u8g_DrawLine(u8g, 61,4,67,4);
-//         u8g_DrawLine(u8g, 56,7,61,4);
-//         u8g_DrawLine(u8g, 72,7,67,4);
-//         u8g_DrawBox(u8g, 63,8,3,3);
-//     }
+     else{                                    /* Comentado */
+         u8g_DrawLine(u8g, 52,0,76,10);
+         u8g_DrawLine(u8g, 52,10,76,0);
+
+         u8g_SetFont(u8g, u8g_font_gdr10);
+         u8g_SetFontPosTop(u8g);
+         u8g_DrawLine(u8g, 57,0,71,0);
+         u8g_DrawLine(u8g, 52,3,57,0);
+         u8g_DrawLine(u8g, 76,3,71,0);
+         u8g_DrawLine(u8g, 61,4,67,4);
+         u8g_DrawLine(u8g, 56,7,61,4);
+         u8g_DrawLine(u8g, 72,7,67,4);
+         u8g_DrawBox(u8g, 63,8,3,3);
+     }                                       /* Hasta aqui comentado */
      u8g_SetFont(u8g, u8g_font_gdr10);
       u8g_SetFontPosTop(u8g);
 

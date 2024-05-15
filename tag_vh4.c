@@ -137,7 +137,7 @@ void application_start( ){
 //    date_set("20/12/25",&i2c_rtc);
 //     time_set("11:80:00",&i2c_rtc);
 
-    //wiced_rtos_create_thread(&displayThreadHandle, THREAD_BASE_PRIORITY+4, NULL, displayThread, THREAD_STACK_SIZE, NULL);
+    wiced_rtos_create_thread(&displayThreadHandle, THREAD_BASE_PRIORITY+4, NULL, displayThread, THREAD_STACK_SIZE, NULL);
 
     wiced_wifi_get_mac_address(&MacW);                             // Se obtiene la MAC del dispositivo
 

@@ -398,7 +398,8 @@ void Time_reboot(void* arg){
                  WPRINT_APP_INFO( ("leave %d \r\n",c_down_net) );    /*<---- Reconexion -----> */
                  c_down_net=c_down_net+1;
              if(c_down_net==7200){
-                 wiced_framework_reboot();
+                 c_down_net = 0;
+                 //wiced_framework_reboot();   Estaba descomentado, pero comente -*-*-*_*-*_*-*_*-*-*->
              }
          }
          else{
@@ -455,7 +456,7 @@ void Time_reboot(void* arg){
 
      if((tcp_down_connect==WICED_TRUE)&&(reg_incoming==WICED_FALSE)){   /* El reg_incoming es usado para primero salvar la informacion */
                                                                         /* Y despues reinciarce el dispositivo */
-         //wiced_framework_reboot();  Estaba descomentado para reiniciarce
+         //wiced_framework_reboot();  Estaba descomentado para reiniciarce   -*-*-*_*-*_*-*_*-*-*->
      }
 
 }

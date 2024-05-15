@@ -19,6 +19,8 @@
 
 uint8_t count_tcp=0;
 uint8_t count_stream=0;
+
+extern void reconection(void);
 /*************** Tcp Configurator Thread ***************/
 /* Thread to publish data to the cloud */
 
@@ -236,7 +238,6 @@ int tcp_gateway( void ){
         if ( result != WICED_SUCCESS )
         {
             try_n=try_n+1;
-            try_n=0;
             if(try_n>=TCP_DOWN_NUMBER){
 ////                   set_name();
                 check_sound_onoff();
@@ -260,6 +261,10 @@ int tcp_gateway( void ){
 
         WPRINT_APP_INFO(("try %d\n",try_n));
 
+        if(try_n > 15)
+        {
+            reconection();
+        }
 
         wiced_ip_address_t myIpAddress;
         wl_bss_info_t ap_info_buffer;
@@ -340,6 +345,7 @@ int tcp_gateway( void ){
                            }
                           }
                       }
+                      wiced_rtos_delay_microseconds( 10 );  /* added */
                       sprintf(data_out,"\nBE;FINAL, s_count_x %d\r\n",s_count_x);
                       result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
                       if(result==WICED_TCPIP_SUCCESS){
@@ -375,7 +381,7 @@ int tcp_gateway( void ){
         // Delete the stream and socket
         wiced_tcp_stream_deinit(&stream);
         wiced_tcp_delete_socket(&socket);
-        return 3;
+        return 1;
 
 
 }

@@ -39,6 +39,7 @@ http_header_field_t header_post[3];
 #include "API/lasec_api.h"
 bool ip_is_up = false;
 wiced_result_t      result_ip= WICED_SUCCESS;
+wiced_result_t      result_re= WICED_SUCCESS;
 
 //#define JSON_MSG "[{\"EventDateFormatted\":\"24/02/2022-13:10:10\",\"LogId\":22,\"ProximityEventDevices\":[,{\"DeviceId\":\"00:00:00:00:00:00\",\"EventType\":2,\"StatusType\":3},]}]"
 #define JSON_MSG  "[{\"EventDateFormatted\":\"24/02/2022-13:10:10\",\"LogId\":22,\"ProximityEventDevices\":[{\"DeviceId\":\"00:00:00:00:00:00\",\"EventType\":2,\"StatusType\":3},{\"DeviceId\":\"00:00:00:00:00:01\",\"EventType\":2,\"StatusType\":2}]}]"
@@ -63,6 +64,7 @@ wiced_bool_t netdown=WICED_FALSE;
 static wiced_timed_event_t tcp_client_event;
 
 void collision_event_log(wiced_thread_arg_t arg);
+void reconection(void);
 
 #define LASEC_JOIN_RETRY_ATTEMPTS   (4000)
 
@@ -247,7 +249,16 @@ void net_vehicle(){
 //      wiced_rtos_create_thread(&publishThreadHandle, THREAD_BASE_PRIORITY+1, NULL, tcp_client, THREAD_STACK_SIZE, NULL);
 }
 
-
+void reconection(void)
+{
+    result_re = wiced_ip_up( interface, WICED_USE_EXTERNAL_DHCP_SERVER, &device_init_ip_settings2 );
+    if(result_re != WICED_SUCCESS)
+    {
+        wiced_leave_ap( interface );
+        /* Re-conection */
+        net_vehicle();
+    }
+}
 
 void collision_event_log(wiced_thread_arg_t arg){
 
