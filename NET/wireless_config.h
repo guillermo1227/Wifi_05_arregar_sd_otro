@@ -160,7 +160,7 @@ wiced_result_t tcp_client_config( void* arg )
 //                WPRINT_APP_INFO(("%s",rx_data));
 
                 WPRINT_APP_INFO(("\nDato: %s\r\n",rx_data));
-                   select_net(rx_data,strlen(rx_data)-1);
+                   select_net(rx_data,strlen(rx_data)-1);  /* Aqui e todnde cambia el valor de set_config(); */
 
          wiced_packet_delete(packet);
          wiced_packet_delete(rx_packet);

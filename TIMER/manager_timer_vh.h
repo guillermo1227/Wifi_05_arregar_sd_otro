@@ -92,7 +92,7 @@ void init_all_timer(){
         wiced_rtos_register_timed_event( &guardian, WICED_NETWORKING_WORKER_THREAD, &guardian_v, 1200, 0 );
         wiced_rtos_register_timed_event( &guardian2, WICED_NETWORKING_WORKER_THREAD, &guardian_V2, 1000, 0 );
         wiced_rtos_register_timed_event( &Geo_guardian, WICED_NETWORKING_WORKER_THREAD, &Beacon_V, 2100, 0 );       /* HE; */
-        wiced_rtos_register_timed_event( &Beacon_guardian, WICED_NETWORKING_WORKER_THREAD, &Acarreo_V, 4500, 0 );   /* HVT */
+        //wiced_rtos_register_timed_event( &Beacon_guardian, WICED_NETWORKING_WORKER_THREAD, &Acarreo_V, 4500, 0 );   /* HVT */
 
 //        wiced_rtos_create_thread(&ThreadHandle_W, THREAD_BASE_PRIORITY+5, "WIFI", SearchWifi, THREAD_STACK_SIZE, NULL);
 
@@ -297,33 +297,13 @@ if(h < 1)
                         printf("**** Texto compiado %s\n",master_data2[cont].all_tex);
                         master_data2[cont].flag=1;
 
-
-//                        printf("********* Guardado en posicion para mandar %d\n",cont);
-//                        memcpy(master_data2[cont].bt_device.mac_bt,AUX_BEACON[b].mac_bt,19);
-//                        memcpy(master_data2[cont].date,date_get_log(&i2c_rtc),12);
-//                        strcpy(master_data2[cont].time_start,AUX_BEACON[b].time_start);
-//                        strcpy(master_data2[cont].time_end,AUX_BEACON[b].time_end);
-//                        strcpy(master_data2[cont].bt_device.mac_wifi,s_Mac_W);
-//                        strcpy(master_data2[cont].state,"off");
-//                        strcpy(master_data2[cont].id,"700");    /* The value of 700 is a number that express online value */
-//                        master_data2[cont].flag=1;
-
                         memset(AUX_BEACON[b].mac_bt,NULL,17);
                         memset(AUX_BEACON[b].time_start,NULL,11);
                         memset(AUX_BEACON[b].time_end,NULL,11);
 
                         cont++;
                         b++;
-                        //wiced_rtos_get_semaphore(&StateMachineSemaphore,WICED_WAIT_FOREVER);
 
-                        if(machineFlagControl == 0)
-                        {
-                            machineFlagControl = 1;
-                            _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
-                            printf("\n _machine_flag = WICED_TRUE \n");
-                            machineFlagControl = 0;
-                        }
-                        //wiced_rtos_set_semaphore(&StateMachineSemaphore);
                     }
                     else
                     {
@@ -334,6 +314,19 @@ if(h < 1)
                 else
                 {
                     b++;
+                }
+            }
+
+            for(uint8_t i=0;i<30;i++)
+            {
+                if(master_data2[i].flag == 1)
+                {
+                    printf("********** Al menos hay un beacon GEOSF que mandar ***************\n");
+                    wiced_rtos_lock_mutex(&GeolocalizationMutex);
+                    _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
+                    wiced_rtos_unlock_mutex(&GeolocalizationMutex);
+                    wiced_rtos_set_semaphore(&StateMachineSemaphore);
+                    break;
                 }
             }
 

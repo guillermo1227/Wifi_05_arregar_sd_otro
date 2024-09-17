@@ -53,6 +53,7 @@ static wiced_thread_t ThreadHandle_C;
 static wiced_semaphore_t semaphoreHandle_C;
 
 static wiced_mutex_t HTTPMutex;
+static wiced_mutex_t GeolocalizationMutex;  /* Mutex usado en Geolocalizacion */
 
 static wiced_mutex_t i2cMutex;
 static wiced_mutex_t pubSubMutex;
@@ -256,10 +257,10 @@ void application_start( ){
               case 0:
                   set_name();
 
-                  Set_SSID("-Ssmartflow-dev",20,WICED_UART_3);
-                  Set_KEY("-KLasec123.",20,WICED_UART_3);
-                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
-                  Set_config();
+//                  Set_SSID("-Ssmartflow-dev",20,WICED_UART_3);
+//                  Set_KEY("-KLasec123.",20,WICED_UART_3);
+//                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
+//                  Set_config();
 
 //                  Set_SSID("-Ssmartflow-dev",20,WICED_UART_3);
 //                  Set_KEY("-KLasec123.",20,WICED_UART_3);

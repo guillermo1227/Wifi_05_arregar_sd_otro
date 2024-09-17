@@ -139,8 +139,8 @@ void tamagochi(char *input,struct Acarreos *acareo){
     unsigned char str_split[128];
     memset(str_split,'\0',128);
 
-    if(strstr(input,ID_acarreo)&&(strlen(acareo->mac_bt)==0)){
-        strcpy(acareo->time_start,time_get(&i2c_rtc));
+    if(strstr(input,ID_acarreo)&&(strlen(acareo->mac_bt)==0)){  /* CAR#9C:20:42:A1:33:44|1 */
+        strcpy(acareo->time_start,time_get(&i2c_rtc));          /* NBC#Carga */
         strcpy(acareo->date,date_get_log(&i2c_rtc));
 
         memcpy(str_split,input,strlen(input));
@@ -194,7 +194,7 @@ void tamagochi(char *input,struct Acarreos *acareo){
     }
     else if(strstr(input,ID_name_beacon)){
 
-        memcpy(str_split,input,strlen(input));
+        memcpy(str_split,input,strlen(input)); /* NBC#Carga */
 
         char * frist_split;
 
@@ -384,9 +384,9 @@ void lcd_fallen_update(unsigned char* buffer_in,uint8_t *fallen){
                     case 1:
                         strcpy(str_temp,cvf);
                         if((strstr(str_temp,"BEAC"))){
-//                           risk_z=WICED_TRUE;
-                            _B_transit=WICED_TRUE;
-
+                           risk_z=WICED_TRUE;
+                           //_B_transit=WICED_TRUE; /* Esto estaba descomentado */
+                           wiced_rtos_set_semaphore(&displaySemaphore);
                         }
                     break;
                     case 2:
