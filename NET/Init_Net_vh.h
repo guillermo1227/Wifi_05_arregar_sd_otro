@@ -314,8 +314,8 @@ void net_config(){
     /* Bring up the network interface */
     wiced_result_t result;
 
-    Set_SSID(SIID_C,sizeof(SIID_C),WICED_UART_1);
-    Set_KEY(PASS_C,sizeof(PASS_C),WICED_UART_1);
+//    Set_SSID(SIID_C,sizeof(SIID_C),WICED_UART_1);
+//    Set_KEY(PASS_C,sizeof(PASS_C),WICED_UART_1);
 
     WPRINT_APP_INFO( ("Net config\r\n") );
     //      result = wiced_network_up(WICED_CONFIG_INTERFACE, WICED_USE_EXTERNAL_DHCP_SERVER,&device_init_settings);
