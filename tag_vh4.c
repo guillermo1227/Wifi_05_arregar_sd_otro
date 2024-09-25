@@ -158,10 +158,10 @@ void application_start( ){
 
     dir_verify("/",&fs_handle,"/",ANTICOLISION);
     dir_verify("/",&fs_handle,"/",SF);
-    dir_verify("/",&fs_handle,"/",ACARREO);
+    //dir_verify("/",&fs_handle,"/",ACARREO);
 
 
-    file_verify(ACARREO_ROOT,&fs_handle,ACARREO_ROOT,date_get(&i2c_rtc));
+    //file_verify(ACARREO_ROOT,&fs_handle,ACARREO_ROOT,date_get(&i2c_rtc));
     file_verify(ANTICOLISION_ROOT,&fs_handle,ANTICOLISION_ROOT,date_get(&i2c_rtc));
     file_verify(SF_ROOT,&fs_handle,SF_ROOT,date_get(&i2c_rtc));
 

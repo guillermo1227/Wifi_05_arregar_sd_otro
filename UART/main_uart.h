@@ -194,7 +194,7 @@ void main_uart(wiced_thread_arg_t arg){
 //                    collision_event_beacon(rx_buffer3);
                     data_bt_send(rx_buffer3);                   /* Acomodo datos para karim */
 
-                    tamagochi(rx_buffer3,&log_accarreos);
+                    //tamagochi(rx_buffer3,&log_accarreos);
 //                    limit_log=id_revived(rx_buffer3);
 
                     memset(&rx_buffer3,'\0',RX_BUFFER_SIZE);
@@ -278,7 +278,6 @@ void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan
                                 if(strlen(AUX_BEACON[b].time_start)!=0){ /* Si ya tiene registro de entrada, se pone el registro de salida */
                                     strcpy(AUX_BEACON[b].time_end,time_get(&i2c_rtc));
                                     printf("OK end\n");
-                                    sprintf(_HE_Hola,"HX;END %d: %s",b,AUX_BEACON[b].mac_bt);
                                 }
                                 AUX_BEACON[b].flag=1;
                                 wirte1=WICED_TRUE;
@@ -292,7 +291,6 @@ void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan
                                 if(strlen(AUX_BEACON[count_beacon].time_start)<1){
                                     strcpy(AUX_BEACON[count_beacon].time_start,time_get(&i2c_rtc));
                                     printf("OK BEAC GEOSF\n");
-                                    sprintf(_HE_OTRO,"HX;INCIO %d: %s",count_beacon,AUX_BEACON[count_beacon].mac_bt);
                                 }
                                 count_beacon=count_beacon+1;
                             }

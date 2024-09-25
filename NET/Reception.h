@@ -378,7 +378,7 @@ int tcp_gateway( void ){
         }
         else if(_machine_flag == WICED_TRUE)
         {
-            printf("Voy a ver que mandaron*******************\n");
+            printf("****Voy a ver que mandaron\n");
             return 2;
         }
         else
@@ -855,7 +855,6 @@ int tcp_client_geo( )
 //                key=2;
                 count_tcp++;
 
-                printf("Se va ha %d\n",count_tcp);
                 if(count_tcp==TCP_NUMBER){
                     state=3;
                     count_tcp=0;

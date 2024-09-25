@@ -130,15 +130,10 @@ static wiced_result_t Acarreo_V( void ){    /* Acarreos HVT */
             memset(log_accarreos.id,NULL,3);
             memset(log_accarreos.time_start,NULL,12);
 
-//            wiced_rtos_get_semaphore(&StateMachineSemaphore,WICED_WAIT_FOREVER);
-//            _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
-//            printf("\n _machine_flag = WICED_TRUE \n");
-//            wiced_rtos_set_semaphore(&StateMachineSemaphore);
             if(machineFlagControl == 0)
             {
                 machineFlagControl = 1;
                 _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
-                printf("\n _machine_flag = WICED_TRUE \n");
                 machineFlagControl = 0;
             }
         }
@@ -278,50 +273,49 @@ if(h < 1)
             if(_wifi_status == WICED_TRUE)
             {
                 printf("Entro en HE\n");
-            uint8_t cont = 0, b=1;
-            while(b <buff_aux)
-            {
-                if((strlen(AUX_BEACON[b].mac_bt)!=0)&&(AUX_BEACON[b].flag==0)&&(strlen(AUX_BEACON[b].time_end)!=0))
+                uint8_t cont = 0, b=1;
+                while(b <buff_aux)
                 {
-                    if(master_data2[cont].flag == 0)
+                    if((strlen(AUX_BEACON[b].mac_bt)!=0)&&(AUX_BEACON[b].flag==0)&&(strlen(AUX_BEACON[b].time_end)!=0))
                     {
-                        memcpy(data_alone.bt_device.mac_bt,AUX_BEACON[b].mac_bt,19);
-                        memcpy(data_alone.date,date_get_log(&i2c_rtc),12);
-                        strcpy(data_alone.time_start,AUX_BEACON[b].time_start);
-                        strcpy(data_alone.time_end,AUX_BEACON[b].time_end);
-                        strcpy(data_alone.bt_device.mac_wifi,s_Mac_W);
-                        strcpy(data_alone.state,"off");
-                        strcpy(data_alone.id,"700");    /* The value of 700 is a number that express online value */
+                        if(master_data2[cont].flag == 0)
+                        {
+                            memcpy(data_alone.bt_device.mac_bt,AUX_BEACON[b].mac_bt,19);
+                            memcpy(data_alone.date,date_get_log(&i2c_rtc),12);
+                            strcpy(data_alone.time_start,AUX_BEACON[b].time_start);
+                            strcpy(data_alone.time_end,AUX_BEACON[b].time_end);
+                            strcpy(data_alone.bt_device.mac_wifi,s_Mac_W);
+                            strcpy(data_alone.state,"off");
+                            strcpy(data_alone.id,"700");    /* The value of 700 is a number that express online value */
 
-                        strcpy(master_data2[cont].all_tex,data_to_json(&data_alone));
-                        printf("**** Texto compiado %s\n",master_data2[cont].all_tex);
-                        master_data2[cont].flag=1;
+                            strcpy(master_data2[cont].all_tex,data_to_json(&data_alone));
+                            printf("**** Texto compiado %s\n",master_data2[cont].all_tex);
+                            master_data2[cont].flag=1;
 
-                        memset(AUX_BEACON[b].mac_bt,NULL,17);
-                        memset(AUX_BEACON[b].time_start,NULL,11);
-                        memset(AUX_BEACON[b].time_end,NULL,11);
+                            memset(AUX_BEACON[b].mac_bt,NULL,17);
+                            memset(AUX_BEACON[b].time_start,NULL,11);
+                            memset(AUX_BEACON[b].time_end,NULL,11);
 
-                        cont++;
-                        b++;
-
-                    }
-                    else
-                    {
-                        cont++;
-                    }
-                    reg_incoming=WICED_FALSE;
-                }
-                else
-                {
-                    b++;
-                }
+                            cont++;
+                            b++;
+                        }
+                        else
+                        {
+                            cont++;
+                        }
+                        reg_incoming=WICED_FALSE;
+                   }
+                   else
+                   {
+                       b++;
+                   }
             }
 
             for(uint8_t i=0;i<30;i++)
             {
                 if(master_data2[i].flag == 1)
                 {
-                    printf("********** Al menos hay un beacon GEOSF que mandar ***************\n");
+                    /* printf("********** Al menos hay un beacon GEOSF que mandar ***************\n"); */
                     wiced_rtos_lock_mutex(&GeolocalizationMutex);
                     _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
                     wiced_rtos_unlock_mutex(&GeolocalizationMutex);
