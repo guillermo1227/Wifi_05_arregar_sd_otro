@@ -304,7 +304,7 @@ int tcp_gateway( void ){
                       for(int f=0;f<data_send_bt;f++){
                           if(f==0){
       //                    sprintf(data_out,"\nV;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get(&i2c_rtc));
-                              sprintf(data_out,"\nHX;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
+                              sprintf(data_out,"\nH;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
                               result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
                               memcpy(data_btt[f].mac_bt,NULL,17);
                                 memcpy(data_btt[f].type,NULL,17);
@@ -319,7 +319,7 @@ int tcp_gateway( void ){
                           wiced_rtos_delay_microseconds( 10 );
 //                          sprintf(data_out,"\nB;%s,%s,%s,%s,%s,%s\r\n",mac_ap,data_btt[f].mac_bt,mac_wifi,data_btt[f].type,data_btt[f].rssi,data_btt[f].fallen);
 //                          sprintf(data_out,"\nB;%s,%s,%s,%s\r\n",mac_ap,data_btt[f].mac_bt,mac_wifi,data_btt[f].rssi);
-                          sprintf(data_out,"\nBX;%s,%s,%s,%s,%s\r\n",mac_ap,data_btt[f].mac_bt,mac_wifi,data_btt[f].type,data_btt[f].rssi);
+                          sprintf(data_out,"\nB;%s,%s,%s,%s,%s\r\n",mac_ap,data_btt[f].mac_bt,mac_wifi,data_btt[f].type,data_btt[f].rssi);
 
                                           memcpy(data_btt[f].mac_bt,NULL,17);
                                           memcpy(data_btt[f].type,NULL,17);
@@ -346,7 +346,7 @@ int tcp_gateway( void ){
                   else{
       //                sprintf(data_out,"\nV;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get(&i2c_rtc));
 //                      sprintf(data_out,"\nL;%s,1600,%d%d%d%d0000000000000,%s,%s,%s,%s\r\n",mac_wifi,t1,t2,t3,t4,mac_ap,ip,time_get(&i2c_rtc),date_get(&i2c_rtc));
-                      sprintf(data_out,"\nHX;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
+                      sprintf(data_out,"\nH;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
 //                      sprintf(data_out,"\nHVT:%s\r\n",data_to_json_acarreo(&log_accarreos,s_Mac_W));
 
                       result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
@@ -795,14 +795,14 @@ int tcp_client_geo( )
                  count_tcp=0;
 
                  uint8_t b;
-                 for(b =0;b<30;b++)
+                 for(b =1;b<buff_aux_4;b++)
                  {
                      if((master_data2[b].flag == 1))
                      {
                          wiced_rtos_delay_microseconds( 10 );
                          printf("Entra en :%d\n",b);
 
-                         sprintf(data_out,"\nHEX;%s\r\n",master_data2[b].all_tex);
+                         sprintf(data_out,"\nHE;%s\r\n",master_data2[b].all_tex);
                          result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
                          if(result==WICED_TCPIP_SUCCESS){
                              send_data_task=WICED_TRUE;
@@ -813,7 +813,7 @@ int tcp_client_geo( )
                              printf("No mando nada\n");
                          }
 
-                         sprintf(data_out,"\nHEX;%s\r\n",master_data2[b].all_tex);
+                         sprintf(data_out,"\nHE;%s\r\n",master_data2[b].all_tex);
                          result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
                          if(result==WICED_TCPIP_SUCCESS){
                              send_data_task=WICED_TRUE;

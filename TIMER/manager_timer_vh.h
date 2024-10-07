@@ -273,45 +273,38 @@ if(h < 1)
             if(_wifi_status == WICED_TRUE)
             {
                 printf("Entro en HE\n");
-                uint8_t cont = 0, b=1;
-                while(b <buff_aux)
+                uint8_t b=1;
+                while(b < buff_aux_4) /* buff_aux */
                 {
                     if((strlen(AUX_BEACON[b].mac_bt)!=0)&&(AUX_BEACON[b].flag==0)&&(strlen(AUX_BEACON[b].time_end)!=0))
                     {
-                        if(master_data2[cont].flag == 0)
-                        {
-                            memcpy(data_alone.bt_device.mac_bt,AUX_BEACON[b].mac_bt,19);
-                            memcpy(data_alone.date,date_get_log(&i2c_rtc),12);
-                            strcpy(data_alone.time_start,AUX_BEACON[b].time_start);
-                            strcpy(data_alone.time_end,AUX_BEACON[b].time_end);
-                            strcpy(data_alone.bt_device.mac_wifi,s_Mac_W);
-                            strcpy(data_alone.state,"off");
-                            strcpy(data_alone.id,"700");    /* The value of 700 is a number that express online value */
+                        memcpy(data_alone.bt_device.mac_bt,AUX_BEACON[b].mac_bt,19);
+                        memcpy(data_alone.date,date_get_log(&i2c_rtc),12);
+                        strcpy(data_alone.time_start,AUX_BEACON[b].time_start);
+                        strcpy(data_alone.time_end,AUX_BEACON[b].time_end);
+                        strcpy(data_alone.bt_device.mac_wifi,s_Mac_W);
+                        strcpy(data_alone.state,"off");
+                        strcpy(data_alone.id,"700");    /* The value of 700 is a number that express online value */
 
-                            strcpy(master_data2[cont].all_tex,data_to_json(&data_alone));
-                            printf("**** Texto compiado %s\n",master_data2[cont].all_tex);
-                            master_data2[cont].flag=1;
+                        strcpy(master_data2[b].all_tex,data_to_json(&data_alone));
+                        //printf("**** Texto compiado %s\n",master_data2[b].all_tex);
+                        master_data2[b].flag=1;
 
-                            memset(AUX_BEACON[b].mac_bt,NULL,17);
-                            memset(AUX_BEACON[b].time_start,NULL,11);
-                            memset(AUX_BEACON[b].time_end,NULL,11);
 
-                            cont++;
-                            b++;
-                        }
-                        else
-                        {
-                            cont++;
-                        }
+                        memset(AUX_BEACON[b].mac_bt,NULL,18);
+                        memset(AUX_BEACON[b].time_start,NULL,12);
+                        memset(AUX_BEACON[b].time_end,NULL,12);
+                        b++;
                         reg_incoming=WICED_FALSE;
-                   }
-                   else
-                   {
-                       b++;
-                   }
-            }
+                    }
+                    else
+                    {
+                        b++;
+                    }
+              }
 
-            for(uint8_t i=0;i<30;i++)
+            //for(uint8_t i=1;i<30;i++)
+            for(uint8_t i=1;i<buff_aux_4;i++)
             {
                 if(master_data2[i].flag == 1)
                 {
@@ -319,7 +312,6 @@ if(h < 1)
                     wiced_rtos_lock_mutex(&GeolocalizationMutex);
                     _machine_flag = WICED_TRUE;       /* Variable to indicate the fill of the carry whit internet */
                     wiced_rtos_unlock_mutex(&GeolocalizationMutex);
-                    wiced_rtos_set_semaphore(&StateMachineSemaphore);
                     break;
                 }
             }
@@ -331,7 +323,7 @@ if(h < 1)
         }
         else if(_wifi_status == WICED_FALSE)
         {
-            for(int b=1;b<buff_aux;b++){
+            for(int b=1;b<buff_aux_4;b++){
                 if((strlen(AUX_BEACON[b].mac_bt)!=0)&&(AUX_BEACON[b].flag==0)&&(strlen(AUX_BEACON[b].time_end)!=0)){
                     wiced_filesystem_unmount(&fs_handle);
                     init_sd(&fs_handle);

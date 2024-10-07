@@ -38,6 +38,7 @@ wiced_bool_t tcp_down_connect=WICED_FALSE;
 //#include "NET/manager_tcp_client_vh.h"
 
 #define buff_aux    100
+#define buff_aux_4    5
 #define filter_size     15
 
 static wiced_thread_t UART_M3;
@@ -239,7 +240,7 @@ void uart_int(){
 void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan los datos de localizacion */
     unsigned char str_switch[4];
     unsigned char str_split[128];
-
+    uint8_t count_HE=0;
 
     wiced_bool_t wirte1=WICED_FALSE;
 
@@ -262,18 +263,16 @@ void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan
 
             switch (x) {
                 case 0:
-//                        memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
                     if((strlen(cvl1)>=filter_size)&&(count_char(cvl1,':')==5)){  //Tamaño mayor a 15, y si hay 5 : ocalizados en la cadena
-                        for(int b=0;b<buff_aux;b++){  /* *** Va a buscar si ya tiene registro de el *** */
+                        for(int b=1;b<buff_aux_4;b++){
                             if(!(strstr(AUX_BEACON[b].mac_bt,cvl1))){ /* No esta aqui */
-//                                AUX_BEACON[b].flag=0;
-//                                printf("no existe \n");
-//                                wirte=WICED_FALSE;
+                            //                                AUX_BEACON[b].flag=0;
+                            //                                printf("no existe \n");
+                            //                                wirte=WICED_FALSE;
 
                             }
-                            else{                            /* Si esta la cadena */
+                            else{
                                 AUX_BEACON[b].flag=1;
-
                                 printf("si existe \n");
                                 if(strlen(AUX_BEACON[b].time_start)!=0){ /* Si ya tiene registro de entrada, se pone el registro de salida */
                                     strcpy(AUX_BEACON[b].time_end,time_get(&i2c_rtc));
@@ -285,17 +284,26 @@ void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan
                         }
                         if(wirte1==WICED_FALSE){  /* No esta, guardamos la mac de beacon */
                             wirte1=WICED_TRUE;
-                            printf("\n Variable para flujo de lo guardado de GEOSF %d\n",count_beacon);
-                            if(count_beacon<buff_aux){
-                                memcpy(AUX_BEACON[count_beacon].mac_bt,cvl1,17);
-                                if(strlen(AUX_BEACON[count_beacon].time_start)<1){
-                                    strcpy(AUX_BEACON[count_beacon].time_start,time_get(&i2c_rtc));
-                                    printf("OK BEAC GEOSF\n");
+                            //if(count_beacon<buff_aux){
+                                printf("-------->Si Guardo\n");
+                                for(uint8_t i=1;i<buff_aux_4;i++)  /* count beacon = 3 */
+                                {
+                                    if(strlen(AUX_BEACON[i].mac_bt)==0 || strlen(AUX_BEACON[i].mac_bt)==NULL ||
+                                            strlen(AUX_BEACON[i].mac_bt) < 3)
+                                    {
+                                        memcpy(AUX_BEACON[i].mac_bt,cvl1,17);
+                                        if(strlen(AUX_BEACON[i].time_start)<1)
+                                        {
+                                            strcpy(AUX_BEACON[i].time_start,time_get(&i2c_rtc));
+                                            //printf("OK BEAC GEOSF\n");
+                                            printf("\n Variable para flujo de lo guardado de GEOSF %d\n",i);
+                                            count_beacon=+1;
+                                        }
+                                        break;
+                                    }
                                 }
-                                count_beacon=count_beacon+1;
-                            }
                             //                                count_beacon++;
-                        }
+                        }   /* Termina */
                     }
                 break;
                 case 1:

@@ -37,6 +37,7 @@ wiced_bool_t flag_lcd_timer=WICED_FALSE;
 int coun_lcd=1;
 int refresh_oled=1;
 char LCD_state[14] ={0}; /* Watchdog */
+char Error[2];
 
 void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,char* c_v,wiced_bool_t flag);
 void displayThread(wiced_thread_arg_t arg);
@@ -95,10 +96,6 @@ void int_lcd(){
 //            start_whatchdog_LCD();
 }
 
-
-
-
-
 void displayThread(wiced_thread_arg_t arg)
 {
     char eva[25];
@@ -111,6 +108,7 @@ void displayThread(wiced_thread_arg_t arg)
 
     sprintf(intro,"SMART FLOW");
     sprintf(eva,"RISK ZONE");
+    sprintf(Error,"xx");
 
     u8g_FirstPage(&display);
     wiced_rtos_lock_mutex(&i2cMutex);
@@ -238,6 +236,7 @@ void displayThread(wiced_thread_arg_t arg)
 #define a 2
 void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,char* c_v,uint8_t flag){
     char eva[25];
+
     wiced_bool_t upnet=WICED_FALSE;
 
     sprintf(eva,"%s",buffer_in);
@@ -322,28 +321,54 @@ void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,cha
        else if((count>C_OLED)&&(count<(C_OLED*2)+15)){
          u8g_SetFont(u8g, u8g_font_gdb30n);
          u8g_SetFontPosTop(u8g);
-         u8g_DrawStr(u8g, 5, 19, c_l);
+         if(atoi(c_l)<56)
+         {
+             u8g_DrawStr(u8g, 5, 19, c_l);
+         }
+         else if(atoi(c_l)>=56)
+         {
+             u8g_SetFont(u8g, u8g_font_gdb30);
+             u8g_SetFontPosTop(u8g);
+             u8g_DrawStr(&display, 5, 10, Error); /* 16 */
+         }
 
           if(atoi(c_v)<10){
              u8g_DrawStr(u8g, 100, 19,c_v);
           }
-          else{
+          else if(atoi(c_v)<56){
              u8g_DrawStr(u8g, 80, 19,c_v);
           }
-       }
-       else {
+          else if(atoi(c_v)>=56){
+              u8g_SetFont(u8g, u8g_font_gdb30);
+              u8g_SetFontPosTop(u8g);
+              u8g_DrawStr(&display, 77, 10, Error);
+          }
        }
     }
     else if(flag==WICED_FALSE) {
         u8g_SetFont(u8g, u8g_font_gdb30n);
         u8g_SetFontPosTop(u8g);
-        u8g_DrawStr(u8g, 5, 19, c_l);
+        if(atoi(c_l) < 56)
+        {
+            u8g_DrawStr(u8g, 5, 19, c_l);
+        }
+        else if(atoi(c_l) >= 56)
+        {
+            u8g_SetFont(u8g,u8g_font_gdb30);
+            u8g_SetFontPosTop(u8g);
+            u8g_DrawStr(u8g, 5, 10, Error);
+        }
 
          if(atoi(c_v)<10){
             u8g_DrawStr(u8g, 100, 19,c_v);
          }
-         else{
+         else if(atoi(c_v) < 56){  /* 58 */
             u8g_DrawStr(u8g, 80, 19,c_v);
+         }
+         else if(atoi(c_v)>=56){
+             u8g_SetFont(u8g, u8g_font_gdb30);
+             u8g_SetFontPosTop(u8g);
+             u8g_DrawStr(&display, 77, 10, Error);
          }
     }
     else if(flag==3){

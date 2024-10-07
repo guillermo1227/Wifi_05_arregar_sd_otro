@@ -43,7 +43,6 @@ uint8_t machineFlagControl=0;
 static wiced_semaphore_t displaySemaphore;
 static wiced_semaphore_t tcpGatewaySemaphore;
 static wiced_semaphore_t tcpReceptionSemaphore;
-static wiced_semaphore_t StateMachineSemaphore;
 //static wiced_semaphore_t httpWait_post;
 //static wiced_semaphore_t httpWait_get;
 
@@ -117,7 +116,6 @@ void application_start( ){
 
     wiced_rtos_init_semaphore(&displaySemaphore);
     wiced_rtos_init_semaphore(&tcpGatewaySemaphore);
-    wiced_rtos_init_semaphore(&StateMachineSemaphore);
 
     wiced_rtos_init_semaphore(&httpWait_get);
     wiced_rtos_init_semaphore(&httpWait_post);
@@ -270,10 +268,10 @@ void application_start( ){
 //                  Set_IP("-C10.174.104.5",16,WICED_UART_3);
 //                  Set_config();
 
-                  Set_SSID("-SCSM-MONITOREO",20,WICED_UART_3);
-                  Set_KEY("-KM0n1t0r30#21",20,WICED_UART_3);
-                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
-                  Set_config();
+//                  Set_SSID("-SCSM-MONITOREO",20,WICED_UART_3);
+//                  Set_KEY("-KM0n1t0r30#21",20,WICED_UART_3);
+//                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
+//                  Set_config();
 
                   net_config();
                   break;
