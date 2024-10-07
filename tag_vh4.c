@@ -261,9 +261,9 @@ void application_start( ){
 //                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
 //                  Set_config();
 
-//                  Set_SSID("-Ssmartflow-dev",20,WICED_UART_3);
-//                  Set_KEY("-KLasec123.",20,WICED_UART_3);
-//                  Set_SERVER("-I10.174.109.33",20,WICED_UART_3);
+                  Set_SSID("-Ssmartflow-dev",20,WICED_UART_3);
+                  Set_KEY("-KLasec123.",20,WICED_UART_3);
+                  Set_SERVER("-I10.174.109.33",20,WICED_UART_3);
 //                  Set_MASK("-M255.255.248.0",16,WICED_UART_3);
 //                  Set_GATEWAY("-G10.174.107.30",16,WICED_UART_3);
 //                  Set_IP("-C10.174.104.5",16,WICED_UART_3);
