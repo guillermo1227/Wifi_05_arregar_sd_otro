@@ -22,7 +22,7 @@ wiced_bool_t hide_on;
 
 #define lasec         "----------------Lasec Telecomunicaciones, S.A.P.I. De C.V.---------------- \r\n"
 #define VERSION     "Smart Vehiculo 3.1 producion y localizacion version 4.1.04.10.2024\r\n"
-#define V_C         "TV:4.1.IP_Estatica"
+#define V_C         "TV:4.1.IP_DHCP"
 #define V_h         "TV4.1_04.10.2024"
 
 //version 3.3.4         contine la activacion de sonido mejora en la pronta busqueda de red y actlizacion en funciomaneiento bt

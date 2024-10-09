@@ -327,7 +327,7 @@ static wiced_result_t Set_config(){
 //        app_dct->F_save=1;
     wiced_dct_write( (const void*) app_dct, DCT_APP_SECTION, 0, sizeof(dct_read_write_app_dct_t) );
     /* release the read lock */
-    wiced_dct_read_unlock( app_dct, WICED_FALSE);
+    wiced_dct_read_unlock( app_dct, WICED_TRUE);
 
     /* Read & print all DCT sections to check that nothing has changed */
     return WICED_SUCCESS;

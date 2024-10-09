@@ -205,7 +205,7 @@ static wiced_result_t Set_SERVER(uint8_t *data,uint8_t len,wiced_uart_t uart){
                //return WICED_SUCCESS;
              }
            /* release the read lock */
-           wiced_dct_read_unlock( app_dct, WICED_FALSE);
+           wiced_dct_read_unlock( app_dct, WICED_TRUE);
 
          /* Read & print all DCT sections to check that nothing has changed */
            return WICED_SUCCESS;
