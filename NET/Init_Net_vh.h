@@ -208,8 +208,8 @@ void net_vehicle(){
 //              }
 //          }
 
-          result_ip = wiced_ip_up( interface, WICED_USE_EXTERNAL_DHCP_SERVER, &device_init_ip_settings2 );
-          //result_ip = wiced_ip_up( interface, WICED_USE_STATIC_IP, &device_init_ip_settings2 );
+          //result_ip = wiced_ip_up( interface, WICED_USE_EXTERNAL_DHCP_SERVER, &device_init_ip_settings2 );
+          result_ip = wiced_ip_up( interface, WICED_USE_STATIC_IP, &device_init_ip_settings2 );
           if((result_ip==WICED_SUCCESS)){
               ip_is_up=true;
               _wifi_status=WICED_TRUE;
