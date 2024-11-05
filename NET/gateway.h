@@ -47,7 +47,7 @@ uint8_t coun;
 #define TCP_CLIENT_RECEIVE_TIMEOUT_LAMP        3000
 
 #define TCP_CONNECTION_NUMBER_OF_RETRIES  6
-#define TCP_DOWN_NUMBER                   22  //60
+#define TCP_DOWN_NUMBER                   42  //60
 #define TCP_CLIENT_STACK_SIZE   (10000)
 
 #define SIID_C "-SSF-HARDWARE"
@@ -374,7 +374,7 @@ void publishThread(wiced_thread_arg_t arg)
                   if(s_count_x!=0){
                       WPRINT_APP_INFO( (">> es igual a %d en %s\n\n\n",s_count_x,mac_ap) );
 
-                      for(int f=0;f<data_send_bt;f++){
+                      for(int f=0;f<data_send_bt;f++){  /* Supongamos que data_b_send == 100 */
                           if(f==0){
       //                    sprintf(data_out,"\nV;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get(&i2c_rtc));
                               sprintf(data_out,"\nH;%s,%s,%s,%s,%s\r\n",mac_wifi,mac_ap,ip,time_get(&i2c_rtc),date_get_log(&i2c_rtc));
@@ -476,19 +476,19 @@ void data_bt_send(unsigned char* buffer_in ){
    //                WPRINT_APP_INFO( ("memecpy -> %s \r\n",pem_mac) );
                    switch (x) {
                        case 0:
-                           memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
+                           memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);  /* Copia la mac sin importar de que sea */
                        break;
                        case 1:
-                           if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHC"))){
+                           if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHI"))){
                                strcpy(data_btt[s_count_x+1].type,"LAMP");
                            }
                            else if(strstr(buffer_in,"BEAC")){
                                strcpy(data_btt[s_count_x+1].type,"BEAC");
                                GEOSF_F=WICED_TRUE;
-
+                               printf("\n **** BEACON ACARO **** \n");
                            }
                            else{
-                               strcpy(data_btt[s_count_x+1].type,"BEAC");
+                               strcpy(data_btt[s_count_x+1].type,"BEAC"); //GEOSF y lo restante
                            }
                            break;
                        case 2:

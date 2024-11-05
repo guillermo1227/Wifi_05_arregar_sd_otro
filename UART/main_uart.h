@@ -47,6 +47,13 @@ struct location_data master_data;
 struct tempo AUX_BEACON[buff_aux];
 struct tempo_collision aux_log_collision[buff_aux];
 
+typedef struct condition_G
+{
+   int8_t menor;
+   int8_t inter;
+   char mac_Geosf[17];
+}data_g;
+struct condition_G data_geosef;
 
 typedef struct data_in
 {
@@ -69,6 +76,8 @@ typedef struct
 
 bt_mc_cyp mac_Re;
 
+wiced_bool_t Save_bt_gatw=WICED_FALSE;
+
 bt_mc_cyp re_mac(wiced_mac_t mac){
     bt_mc_cyp mm;
     int v;
@@ -83,7 +92,6 @@ bt_mc_cyp re_mac(wiced_mac_t mac){
     }
     return mm;
 }
-
 
 wiced_uart_config_t uart_config =
 {
@@ -120,6 +128,15 @@ int count_save_collision=1;
 
 
 struct Acarreos log_accarreos;
+
+
+struct Gatw_bengala                  /* <--- Mi esrtrucutra ---> */
+{
+    unsigned char mac_bt_gatw[19];
+    uint8_t num_lamp;
+    uint8_t nodo;
+};
+struct Gatw_bengala log_node[100];
 int limit_log=0;
 
 
@@ -181,17 +198,9 @@ void main_uart(wiced_thread_arg_t arg){
                     sprintf(uart3,"%s\n",rx_buffer3);
 //                    wiced_uart_transmit_bytes( WICED_UART_1, uart3, strlen(uart3));
 
-                    lcd_data_update(rx_buffer3,&count_v,&count_l,&proximity);
-                    lcd_fallen_update(rx_buffer3,&lcd_fallen);
-//                    SEND_OTA(rx_buffer3);
-                    data_file_write(rx_buffer3);
-//                    get_join_macbt(rx_buffer3);
-//                    collision_event_macbt(rx_buffer3);
-//                    collision_event_beacon(rx_buffer3);
-                    data_bt_send(rx_buffer3);
+                    fill_dat_bengala(rx_buffer3); /* Localizacion MESH|NODO|LAMP/VEHICULE|MAC */
 
-                    tamagochi(rx_buffer3,&log_accarreos);
-//                    limit_log=id_revived(rx_buffer3);
+                    //fill_Node_bengala(rx_buffer3); /* Fill node information  */
 
                     memset(&rx_buffer3,'\0',RX_BUFFER_SIZE);
                     memset(&rx_buffer,'\0',100);
@@ -206,15 +215,10 @@ void main_uart(wiced_thread_arg_t arg){
 
             expected_data_size = 1;
             wiced_rtos_unlock_mutex(&HTTPMutex);
-
             }
-
         }
-
         wiced_rtos_delay_milliseconds(1); // Yield control when button is not pressed
     }
-
-
 
 void uart_int(){
     /* Initialise ring buffer */
@@ -231,311 +235,146 @@ void uart_int(){
        wiced_rtos_create_thread(&UART_M3, THREAD_BASE_PRIORITY+2, "UART MAIN", main_uart, THREAD_STACK_SIZE, NULL);
 }
 
+uint8_t Nodo, T_lamparas=0,N_lamp=0, down_v,up_v, position=0;
+void fill_dat_bengala(char* input)
+{
+    static uint8_t count=0;
+    if(count ==0)   /* Limpio todo */
+    {
+        for(uint8_t i=0;i <= 100;i++)           /* Termino en 100 ya que el 0 no lo uso */
+        {
+            memset(log_node[i].mac_bt_gatw,0,19);
+        }
+        count++;
+    }
 
-void data_file_write(unsigned char* buffer_in ){
-    unsigned char str_switch[4];
-    unsigned char str_split[128];
-
-
-    wiced_bool_t wirte1=WICED_FALSE;
-
-//    read_data(SF_ROOT,date_get(&i2c_rtc),&fs_handle);
-//    sprintf(s_Mac_W,"%02X:%02X:%02X:%02X:%02X:%02X",MacW.octet[0],MacW.octet[1],MacW.octet[2],MacW.octet[3],MacW.octet[4],MacW.octet[5]);
-
-    strncpy(str_switch,buffer_in,4);
-    memcpy(str_split,buffer_in,strlen(buffer_in));
-
-    char delim[2] = ",";
+    _Mac_Gat = WICED_FALSE;
     int x=0;
+    unsigned char str_split[40], mac_bt[17],device[5];
+    memset(str_split,'\0',40);
 
-    if((strstr(buffer_in,"BNM|"))&&((strstr(buffer_in,"GEOSF")))&&((strstr(buffer_in,"LAMP"))==NULL)&&((strstr(buffer_in,"VEHC"))==NULL)){
-        _B_transit=WICED_TRUE;
-        unsigned char *cvl_1 = strtok(str_split, "|");
-        cvl_1=strtok(NULL, "|");
-        reg_incoming=WICED_TRUE;
-                //            count_save=1;
-        GEOSF_F=WICED_TRUE;
+    memcpy(text_gatw,input,3);
 
-        unsigned char *cvl1 = strtok(cvl_1, delim);
-        while(cvl1 != NULL){
+    if(strstr(text_gatw,_GAT_MENS))
+    {
+        memcpy(str_split,input,strlen(input));
 
-            switch (x) {
-                case 0:
-//                        memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-                    if((strlen(cvl1)>=filter_size)&&(count_char(cvl1,':')==5)){
-                        for(int b=0;b<buff_aux;b++){
-                            if(!(strstr(AUX_BEACON[b].mac_bt,cvl1))){
-//                                AUX_BEACON[b].flag=0;
-//                                printf("no existe \n");
-//                                wirte=WICED_FALSE;
+        /* Realizo el strtok para separar texto de nelson */
+        char * frist_split;
+        frist_split=strtok(str_split,_split_tama_2);
 
-                            }
-                            else{
-                                AUX_BEACON[b].flag=1;
-
-                                printf("si existe \n");
-                                if(strlen(AUX_BEACON[b].time_start)!=0){
-                                    strcpy(AUX_BEACON[b].time_end,time_get(&i2c_rtc));
-                                    printf("OK end\n");
-
-                                }
-                                AUX_BEACON[b].flag=1;
-                                wirte1=WICED_TRUE;
-                            }
-                        }
-                        if(wirte1==WICED_FALSE){
-                            wirte1=WICED_TRUE;
-                            printf("escribe %d\n",count_beacon);
-                            if(count_beacon<buff_aux){
-                                memcpy(AUX_BEACON[count_beacon].mac_bt,cvl1,17);
-                                if(strlen(AUX_BEACON[count_beacon].time_start)<1){
-                                    strcpy(AUX_BEACON[count_beacon].time_start,time_get(&i2c_rtc));
-                                    printf("OK\n");
-                                }
-                                count_beacon=count_beacon+1;
-                            }
-                            //                                count_beacon++;
-                        }
-                    }
+        while(frist_split!=NULL)
+        {
+            switch (x)
+            {
+            case 0:
+                /* MESH no hago nada */        /* MESH|    5    |     3     |      5      | LAMP|   Mac Bt  */
+                break;                                 /* NODO   No. lampara  Cantidad To         Mac Bluetooth*/
+            case 1:
+                /* Numero de nodo */          /* 5 */
+                Nodo = atoi(frist_split);
                 break;
-                case 1:
-//                        strcpy(data_btt[s_count_x+1].type,cvl1);
-//                        memcpy(master_data.bt_device.type,cvl1,17);
-
-                    break;
-                case 2:
-//                        strcpy(data_btt[s_count_x+1].rssi,cvl1);
-                    break;
-                case 3:
-//                        strcpy(data_btt[s_count_x+1].fallen,cvl1);
-                    break;
-                default:
-                    break;
+            case 2:
+                /* ID lampara, significa el numero de lampara que ocupa esa lampara detectada  si ve 10, enviaria un numero 2 */
+                N_lamp = atoi(frist_split);   /* 4 */
+                break;
+            case 3:
+                /* Cantidad de lamparas */
+                T_lamparas = atoi(frist_split);
+                break;
+            case 4:
+                memcpy(device,frist_split,4);  /* LAMP o VEHI */
+                break;
+            case 5:
+                /* Mac del dispositivo */
+                memcpy(mac_bt,frist_split,17);
+                printf("MAC:%s\n",mac_bt);
+                break;
+            default:
+                break;
             }
             x++;
-            cvl1=strtok(NULL, delim);
+            frist_split=strtok(NULL,_split_tama_2);
         }
-        x=0;
 
+        /* 1.- Identifico donde lo voy a poner, seccio de lamapras o seccion de vehiclos */
 
-
-//            read_data(SF_ROOT,"/01_08_2022.txt",&fs_handle);
-
-
-
-    }
-
-
-
-//    wiced_rtos_set_semaphore(&displaySemaphore);
-
-}
-
-void get_join_macbt(unsigned char* buffer_in){
-    unsigned char str_switch[3];
-        unsigned char str_split[RX_BUFFER_SIZE];
-        unsigned char pem_mac[17];
-        unsigned char str_temp[17];
-
-
-        strncpy(str_switch,buffer_in,3);
-//        WPRINT_APP_INFO( (">>VBT \r\n") );
-//         WPRINT_APP_INFO( ("%s \r\n",buffer_in) );
-
-        char delim[] = "$";     //establece como  realizara el split
-        int x=0;
-        if((memcmp(str_switch,"MBL",3)==0)&&(strlen(buffer_in)<=RX_BUFFER_SIZE-1)){
-
-            memcpy(str_split,&buffer_in[3],strlen(buffer_in)-2);
-
-            WPRINT_APP_INFO( ("%s \r\n",str_split) );
-
-            unsigned char *cvl1 = strtok(str_split, delim);
-            while(cvl1 != NULL){
-//                WPRINT_APP_INFO( ("strtok -> %s \r\n",cvl1) );
-//                strcpy(pem_mac,cvl1);
-//                WPRINT_APP_INFO( ("memecpy -> %s \r\n",pem_mac) );
-                switch (x) {
-                    case 0:
-//                        memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-//                        printf("\tMAC ABORDADAS 0\t %s\n",cvl1 );
-
-                    break;
-                    case 1:
-//                        strcpy(data_btt[s_count_x+1].type,cvl1);
-                        printf("\tMAC ABORDADAS 1\t %s longuitud %d \t\n",cvl1 ,strlen(cvl1));
-//                       bt_joined.mac_lamp=cvl1;
-//                        char aux[strlen(cvl1)];
-//                        sprintf(aux,"%s",cvl1);
-                        memcpy(bt_joined.mac_lamp,cvl1,strlen(cvl1)-1);
-
-                        break;
-
-                    default:
-                        break;
-                }
-                x++;
-                cvl1=strtok(NULL, delim);
-            }
-            x=0;
-
-
-    }
-}
-
-/*
- * BNM:9C:50:D1:1A:4D:C0,LAMP,0,1
- * */
-void collision_event_macbt(unsigned char* buffer_in){
-    unsigned char str_switch[4];
-    unsigned char str_split[128];
-    unsigned char pem_mac[17];
-    unsigned char str_temp[17];
-
-    wiced_bool_t wirte_1=WICED_FALSE;
-    printf("%s\n",buffer_in);
-
-    strncpy(str_switch,buffer_in,4);
-    memcpy(str_split,buffer_in,strlen(buffer_in));
-
-    char delim[] = ",";     //establece como  realizara el split
-    int x=0;
-    if((strstr(buffer_in,"BNM|"))&&(strstr(buffer_in,"X"))&&((strstr(buffer_in,"GEOSF")==NULL))){
-
-        unsigned char *cvl_1 = strtok(str_split, "|");
-            cvl_1=strtok(NULL, "|");
-
-
-//            printf("%s\n",str_split);
-//            printf("%s\n",cvl_1);
-    unsigned char *cvl1 = strtok(cvl_1, delim);
-    while(cvl1 != NULL){
-//                WPRINT_APP_INFO( ("strtok -> %s \r\n",cvl1) );
-//                strcpy(pem_mac,cvl1);
-//                WPRINT_APP_INFO( ("memecpy -> %s \r\n",pem_mac) );
-        switch (x) {
-            case 0:
-//                memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-//                printf("%s\n",cvl1);
-//                strcpy( bt_joined.mac_tag,cvl1);
-/*--------------------------------------------------------------------------------*/
-                printf("cuentas %d\n",count_char(cvl1,':'));
-                if((strlen(cvl1)>=filter_size)&&(count_char(cvl1,':')==5)){
-                        for(int x=1;x<buff_aux;x++){
-                            if((strstr(aux_log_collision[x].mac_bt,cvl1))){
-                                printf("the collision continues: %s \n",cvl1);
-                                wirte_1=WICED_TRUE;
-                                aux_log_collision[x].flag=1;
-                            }
-                        }
-                        if(wirte_1==WICED_FALSE){
-                            wirte_1=WICED_TRUE;
-                            printf("Collison number %d\n",count_collision);
-                            if(count_collision<buff_aux){
-                                memset(aux_log_collision[count_collision].mac_bt,NULL,18);
-                                strncpy(aux_log_collision[count_collision].mac_bt,cvl1,17);
-//                                definir la condicion
-
-                                if(strlen(AUX_BEACON[count_beacon].time_start)<1){
-                                    strncpy(aux_log_collision[count_collision].time_start,time_get(&i2c_rtc),17);
-                                }
-                                count_collision=count_collision+1;
-                            }
-                        }
-                }
-/*--------------------------------------------------------------------------------*/
-
-            break;
-            case 1:
-//                strcpy(data_btt[s_count_x+1].type,cvl1);
-                break;
-            case 2:
-//                strcpy(data_btt[s_count_x+1].rssi,cvl1);
-                break;
-            case 3:
-//                strcpy(data_btt[s_count_x+1].fallen,cvl1);
-                break;
-            case 4:
-//                        stun mrcpy(data_btt[s_count_x+1].fallen,cvl1);
-                printf("%s\n",cvl1);
-//                wiced_rtos_set_semaphore(&semaphoreHandle_C); /* Set the semaphore */
-
-                break;
-            default:
-                break;
+        /* si dependiedo el tipo de nodo en esta posicion guardo algo, tengo 100 dato, al nodo 1 le doy
+         * 1 a 5, al nodo 2 le doy de 6 a 10 */
+        /* 1.- Primero dependiendo del numero de nodo voy a sacar desde que parte hasta que parte el puede guardar informacion  */
+        if(strstr("LAMP",device))
+        {
+            up_v   = Nodo * 5;
+            down_v = up_v - 5;
+            position = down_v + N_lamp;
         }
-        x++;
-        cvl1=strtok(NULL, delim);
-    }
-    x=0;
-
-
-
-//
-    }
-//
-//
-//
-//
-//
-}
-
-
-void collision_event_beacon(unsigned char* buffer_in){
-    unsigned char str_switch[4];
-    unsigned char str_split[128];
-    unsigned char pem_mac[17];
-    unsigned char str_temp[17];
-
-    strncpy(str_switch,buffer_in,4);
-    strcpy(str_split,&buffer_in[4]);
-
-    char delim[] = ",";     //establece como  realizara el split
-    int x=0;
-    if((strstr(str_switch,"BNM:"))&&(strstr(str_switch,"BEAC"))&&((strstr(str_switch,"GEOSF")==NULL))){
-
-    unsigned char *cvl1 = strtok(str_split, delim);
-    while(cvl1 != NULL){
-//                WPRINT_APP_INFO( ("strtok -> %s \r\n",cvl1) );
-//                strcpy(pem_mac,cvl1);
-//                WPRINT_APP_INFO( ("memecpy -> %s \r\n",pem_mac) );
-        switch (x) {
-            case 0:
-//                memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-//                printf("%s\n",cvl1);
-                strcpy( bt_joined.mac_beacon,cvl1);
-
-//                bt_joined.mac_beacon
-//                printf("\t%s\n",bt_joined.mac_tag);
-//                printf("\t%s\n",bt_joined.mac_beacon);
-//                printf("\t%s\n",bt_joined.mac_lamp);
-//                printf("\t%s\n",bt_joined.mac_vehc);
-
-            break;
-            case 1:
-//                strcpy(data_btt[s_count_x+1].type,cvl1);
-                break;
-            case 2:
-//                strcpy(data_btt[s_count_x+1].rssi,cvl1);
-                break;
-            case 3:
-//                strcpy(data_btt[s_count_x+1].fallen,cvl1);
-                break;
-            case 4:
-//                        stun mrcpy(data_btt[s_count_x+1].fallen,cvl1);
-                printf("%s\n",cvl1);
-
-                break;
-            default:
-                break;
+        else    /* Vehicule */
+        {
+            up_v   = Nodo * 10;
+            down_v = up_v - 5;
+            position = down_v + N_lamp;
         }
-        x++;
-        cvl1=strtok(NULL, delim);
+        printf("Posicion donde se guardara el dato en mi estrucutra %d \n",position);
+        /* 2.- Copiar dato en mi estructura */
+
+            log_node[position].num_lamp=N_lamp;                               /* numero de lampara  */
+            memcpy(log_node[position].mac_bt_gatw,mac_bt,strlen(mac_bt)); /* Mac */
+            log_node[position].num_lamp = N_lamp;
     }
-    x=0;
-
-
+    else if(strstr(text_gatw,_GAT_CLEAN)) /* Elimino todo */
+    {
+        for(int i=0;i <= 100;i++)
+        {
+            memset(log_node[i].mac_bt_gatw,NULL,19);
+            log_node[i].num_lamp=0;
+            Save_bt_gatw = WICED_FALSE;
+        }
     }
-
 }
+
+char* fill_jaso_dat(char* res, int num)
+{
+    //printf("\n Longitud:%d\n",strlen(log_bengala[num].mac_bt_gatw));${ProjDirPath}/make.exe ww101.Bengala_gateway.Tag_Vehiculo_3_0-CYW943907AEVAL1F ALWAYS=1
+
+    sprintf(res,"{\"Node\":\"%d\",\"T_lamp\":\"%d\",\"No_lamp\":\"[%d]\",\"Mac\":%s}",Nodo,T_lamparas,log_node[num].num_lamp,log_node[num].mac_bt_gatw);
+    //printf("\n ***************** Mac %s \n",log_bengala[num].mac_bt_gatw);
+    return res;
+}
+
+//fill_Node_bengala(char* input)
+//{
+//    int x=0;
+//        unsigned char str_split[40], mac_bt[17];
+//        memset(str_split,'\0',40);
+//
+//        memcpy(text_gatw,input,3);
+//
+//        if(strstr(text_gatw,_NODE_MENS)) /* Suponiendo que llega el mensaje OPND|TYPE|MAC|ID|INPUT   NODE: Significa el numero de nodo a abrir, es decir en que punto abrira la puerta*/
+//        {                                                   /* OPND|1|9C:50:D1:80:44:30|NODE1|0 *//* TYPE: Es igual a abierto 1 o cerrado 0 */
+//            memcpy(str_split,input,strlen(input));                                                /* ID: Significa el nuermo de nodo que o esta activando node1 o node2, etc */
+//                                                                                                  /* INOUT: Significa el gpio para activar 0:gpio numero 0  1:gpio numero 1*/
+//                    /* Realizo el strtok para separar texto de nelson */
+//                    char * frist_split;
+//                    frist_split=strtok(str_split,_split_tama_2);
+//
+//                    while(frist_split!=NULL)
+//                    {
+//                        switch (x)
+//                        {
+//                        case 0:
+//
+//                            break;
+//                        case 1:
+//                            break;
+//                        case 2:
+//                            break;
+//                        case 3:
+//                            break;
+//                        }
+//                        default:
+//                            break;
+//                    }
+//        }
+//}
+
 #endif  /* stdbool.h */

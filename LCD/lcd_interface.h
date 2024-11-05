@@ -23,16 +23,25 @@
 
 #define online      "Connected"
 #define offline     "Offline"
+#define LCD_Success   "Succes_lcd"
+#define LCD_Unsuccess "Unsuccess lcd"
 
 #define fallen "FALLEN"
 #define C_OLED (30)
 wiced_bool_t flag_lcd_timer=WICED_FALSE;
 
+#define MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES (7000*MILLISECONDS)                                                       /* Watchdog */
+#define EXPECTED_WORK_TIME                               (MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES - (100*MILLISECONDS))    /* Watchdog */
+#define UNEXPECTED_DELAY                                 (200*MILLISECONDS)
+
 int coun_lcd=1;
 int refresh_oled=1;
+char LCD_state[14] ={0}; /* Watchdog */
 
 void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,char* c_v,wiced_bool_t flag);
 void displayThread(wiced_thread_arg_t arg);
+void screen_checker(void);            /* Watchdog */
+extern void start_whatchdog_LCD(void);       /* Watchdog */
 
 wiced_bool_t risk_t =WICED_FALSE;
 wiced_bool_t evacution_t =WICED_FALSE;
@@ -65,6 +74,25 @@ void int_lcd(){
     u8g_InitComFn(&display, &u8g_dev_sh1106_128x64_2x_i2c, u8g_com_hw_i2c_fn);
     u8g_SetFont(&display, u8g_font_gdr10);
     u8g_SetFontPosTop(&display);
+
+//    /* Registro de monitoreo*/
+//    wiced_register_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES ); /* Monitoring the LCD screen */
+//
+//            if(wiced_i2c_probe_device(&display_i2c, 5) == WICED_TRUE)
+//            {
+//                //wiced_uart_transmit_bytes(WICED_UART_1,"LCD startup successful", strlen("LCD startup successful"));
+//                memcpy(LCD_state,LCD_Success,strlen(LCD_Success));
+//                printf("\n LCD init sucess \n");
+//            }
+//            else
+//            {
+//                //wiced_uart_transmit_bytes(WICED_UART_1,"No LCD successful", strlen("No LCD successful"));
+//                memcpy(LCD_state,LCD_Unsuccess,strlen(LCD_Unsuccess));
+//                printf("\n LCD init No sucess \n");
+//            }
+//            /* Actualizacion del monitoreo */
+//            wiced_update_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES );
+//            start_whatchdog_LCD();
 }
 
 
@@ -355,5 +383,33 @@ void lcd_draw_count(u8g_t* u8g,uint8_t tc_v,uint8_t tc_l, const u8g_fntpgm_uint8
 
 }
 
+void screen_checker()
+{
+    static uint8_t counter_lcd=0;
+//    if(wiced_update_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES ) == WICED_SUCCESS)
+//    {
+//        printf("\n Receteo del watchdog \n");
+//    }
+
+//    if(wiced_i2c_probe_device(&display_i2c, 5) == WICED_TRUE)
+//    {
+//        wiced_update_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES );
+//        printf("\n LCD continue sucesful \n");
+//        //wiced_uart_transmit_bytes(WICED_UART_1,"LCD continue successful\n", strlen("LCD continue successful\n"));
+//        sprintf(LCD_state,"%s",LCD_Success);
+//        counter_lcd=0;
+//    }
+//    else if(counter_lcd <= 3)
+//    {
+//        if(wiced_update_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES )== WICED_SUCCESS)
+//        {
+//            printf("\n LCD continue No sucesful \n");
+//        }
+//        //wiced_uart_transmit_bytes(WICED_UART_1,"LCD no continue successful\n", strlen("LCD no continue successful\n"));
+//        sprintf(LCD_state,"%s",LCD_Unsuccess);
+//        counter_lcd++;   /* Se visualizara el mensaje de LCD no conetada por 2 ciclos, despues se reiniciara */
+//    }
+//    wiced_update_system_monitor( &my_thread_monitor, MAXIMUM_ALLOWED_INTERVAL_BETWEEN_MONITOR_UPDATES );
+}
 
 #endif  /* stdbool.h */

@@ -29,6 +29,8 @@ wiced_bool_t _flag_aca=WICED_FALSE;
 wiced_bool_t _flag_driver = WICED_FALSE; /* Variable used to indicate the sound of driver */
 unsigned char _lateral_veh[2];
 unsigned char _lateral_lam[2];
+char text_gatw[3];
+wiced_bool_t _Mac_Gat = WICED_FALSE;
 
 struct bt_data
 {
@@ -94,8 +96,11 @@ struct tempo_collision{
 #define ID_acarreo  "CAR#"
 #define _MSG_TEST   "CAR#11:00:33:44:55:66|4\0"
 #define _MSG_TEST2  "BNM|BC:57:29:00:2E:DB,GEOSF,-95,0"
-#define _N_KDV      "KDV"
-#define _NONE       "NONE"
+#define _GAT_MENS   "MESH"
+#define _GAT_CLEAN   "NOF"
+#define _NODE_MENS   "OPND"
+
+#define _Max_mac 100
 
 static char _split_tama_1[] ="#";
 static char _split_tama_2 []="|";
@@ -119,141 +124,7 @@ struct Acarreos
 
 };
 
-//char mac_bt_D[19]; /* Variable used in the driver identificator */
-void tamagochi(char *input,struct Acarreos *acareo){
-    int x=0;
-    unsigned char str_split[128];
-    memset(str_split,'\0',128);
 
-    if(strstr(input,ID_acarreo)&&(strlen(acareo->mac_bt)==0)){
-        strcpy(acareo->time_start,time_get(&i2c_rtc));
-        strcpy(acareo->date,date_get_log(&i2c_rtc));
-
-        memcpy(str_split,input,strlen(input));
-
-        char * frist_split;
-
-        frist_split=strtok(str_split,_split_tama_1);
-        frist_split=strtok(NULL,_split_tama_1);
-
-//         printf("<<%s\n",frist_split);
-
-        char *second_split;
-
-        second_split=strtok(frist_split,_split_tama_2);
-//         printf("<<%s\n",second_split);
-
-        while(second_split!=NULL){
-            switch (x)
-            {
-            case 0:
-                /* code */
-//                         printf("mmmm%s\n",second_split);
-
-                memcpy(acareo->mac_bt,second_split,strlen(second_split));
-                acareo->mac_bt[strlen(second_split)]='\0';
-                break;
-            case 1:
-                /* code */
-                acareo->type=atoi(second_split);
-//                switch(acareo->type){
-//                case 1:
-//
-//                    break;
-//                }
-                break;
-            case 2:
-                /* code */
-//                _flag_aca=WICED_TRUE;
-//                acareo->type=atoi(second_split);
-//                memcpy(acareo->name,second_split,strlen(second_split));
-//                acareo->name[strlen(second_split)]='\0';
-                break;
-            default:
-                break;
-            }
-            x++;
-            second_split=strtok(NULL,_split_tama_2);
-        }
-
-    }
-    else if(strstr(input,ID_name_beacon)){
-
-        memcpy(str_split,input,strlen(input));
-
-        char * frist_split;
-
-        frist_split=strtok(str_split,_split_tama_1);
-        frist_split=strtok(NULL,_split_tama_1);
-
-         printf("<<%s\n",frist_split);
-
-        char *second_split;
-
-        second_split=strtok(frist_split,_split_tama_2);
-         printf("<<%s\n",second_split);
-
-        while(second_split!=NULL){
-            switch (x)
-            {
-            case 0:
-                /* code */
-                _flag_aca=WICED_TRUE;
-                memcpy(acareo->name,second_split,strlen(second_split));
-                acareo->name[strlen(second_split)]='\0';
-                printf("%s",acareo->name);
-                break;
-            default:
-                break;
-            }
-            x++;
-            second_split=strtok(NULL,_split_tama_2);
-        }
-
-    }
-//    else if(strstr(input,_N_KDV))
-//        {
-//            memcpy(str_split,input,strlen(input));
-//            //printf("\n Copio %s\n",str_split);
-//
-//            char * first_split;
-//
-//            first_split=strtok(str_split,_split_tama_2);
-//
-//            while(first_split !=NULL)
-//            {
-//                switch(x)
-//                {
-//                case 0:
-//                    /* No hago nada */
-//                    break;
-//                case 1:
-//                    if(strstr(input ,_NONE))
-//                    {
-//                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-//                    }
-//                    else
-//                    {
-//                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-//                        //memcpy(mac_bt_D, first_split,strlen(first_split));
-//                        memcpy(mac_bt_D, first_split,strlen(first_split));
-//                        mac_bt_D[strlen(first_split)]='\0';
-//                        printf("\n %s \n",mac_bt_D);
-//                    }
-//
-//                    break;
-//                    default:
-//                        break;
-//                }
-//                first_split = strtok(NULL,_split_tama_2);
-//                x++;
-//            }
-//
-//                _flag_driver = WICED_TRUE;
-//          }
-    wiced_rtos_set_semaphore(&displaySemaphore);
-
-}
 
 void split_reader(unsigned char* buffer_in){
     unsigned char str_split2[128];
@@ -339,66 +210,6 @@ void lcd_data_update(unsigned char* buffer_in,uint8_t *c_v,uint8_t *c_l,wiced_bo
 
 
     }
-
-}
-
-
-void lcd_fallen_update(unsigned char* buffer_in,uint8_t *fallen){
-    unsigned char str_temp[17];
-    unsigned char str_switch[3];
-    char *cvl;
-    int x=0;
-    char delim[] = ",";     //establece como  realizara el split
-    unsigned char str_split[128];
-
-    strncpy(str_switch,buffer_in,4);
-    strcpy(str_split,&buffer_in[4]);
-
-    int fal;
-
-    int t=0;
-    char fall_at[2];
-
-    if(strstr(str_switch,"BNM|")){
-
-            unsigned char *cvf = strtok(str_split, delim);
-            while(cvf != NULL){
-                switch (t) {
-                    case 0:
-                    break;
-                    case 1:
-                        strcpy(str_temp,cvf);
-                        if((strstr(str_temp,"BEAC"))){
-//                           risk_z=WICED_TRUE;
-                            _B_transit=WICED_TRUE;
-
-                        }
-                    break;
-                    case 2:
-                    break;
-                    case 3:
-                        strcpy(fall_at,cvf);
-                        fal=atoi(fall_at);
-                        *fallen=fal;
-                        if(fal==1){
-                            fallen_f=WICED_TRUE;
-                            wiced_rtos_set_semaphore(&displaySemaphore);
-
-                        }
-//                        WPRINT_APP_INFO(("\r\n\r\n\r\nProcess: %d \r\n",*fallen));
-                        break;
-                    default:
-                        break;
-                }
-                t++;
-                cvf=strtok(NULL, delim);
-            }
-            t=0;
-
-        }
-
-
-
 
 }
 

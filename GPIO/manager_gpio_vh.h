@@ -332,6 +332,7 @@ void reset_server(){
 //    wiced_framework_reboot();
     WPRINT_APP_INFO( ("Buton pressed gpio 3\r\n") );
 
+    wiced_uart_transmit_bytes(WICED_UART_1,"Reset device", strlen("Reset device"));
 }
 void reset_sequence(){
     for (int v=0;v<=7;v++){
