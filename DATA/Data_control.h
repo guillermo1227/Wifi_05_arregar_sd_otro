@@ -29,6 +29,7 @@ wiced_bool_t _flag_aca=WICED_FALSE;
 wiced_bool_t _flag_driver = WICED_FALSE; /* Variable used to indicate the sound of driver */
 wiced_bool_t _wifi_status=WICED_FALSE;   /* Variable used to indicate the state of wifi */
 wiced_bool_t _machine_flag=WICED_FALSE;
+wiced_bool_t _flag_D_in = WICED_FALSE;
 unsigned char _lateral_veh[2];
 unsigned char _lateral_lam[2];
 unsigned char _HVT_Text[150];
@@ -223,45 +224,42 @@ void tamagochi(char *input,struct Acarreos *acareo){
         }
     }
     else if(strstr(input,_N_KDV))
+    {
+        //memset(mac_bt_D,'\0',strlen(mac_bt_D));
+        memcpy(str_split,input,strlen(input));
+        char * first_split;
+        first_split=strtok(str_split,_split_tama_2);
+
+        while(first_split !=NULL)
         {
-            memcpy(str_split,input,strlen(input));
-            //printf("\n Copio %s\n",str_split);
-
-            char * first_split;
-
-            first_split=strtok(str_split,_split_tama_2);
-
-            while(first_split !=NULL)
+            switch(x)
             {
-                switch(x)
+            case 0:
+                /* No hago nada */
+                break;
+            case 1:
+                if(strstr(input ,_NONE) && (_flag_D_in = WICED_TRUE))
                 {
-                case 0:
-                    /* No hago nada */
-                    break;
-                case 1:
-                    if(strstr(input ,_NONE))
-                    {
-                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-                    }
-                    else
-                    {
-                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-                        //memcpy(mac_bt_D, first_split,strlen(first_split));
-                        memcpy(mac_bt_D, first_split,strlen(first_split));
-                        mac_bt_D[strlen(first_split)]='\0';
-                        printf("\n %s \n",mac_bt_D);
-                    }
-
-                    break;
-                    default:
-                        break;
+                    memset(mac_bt_D,'\0',strlen(mac_bt_D));
+                    _flag_D_in = WICED_FALSE;
+                    _flag_driver = WICED_TRUE;   /* Activar el sonido */
                 }
-                first_split = strtok(NULL,_split_tama_2);
-                x++;
+                else if(_flag_D_in == WICED_FALSE)
+                {       /* Entra 9C:50:D1:22:34:55 */
+                    memset(mac_bt_D,'\0',strlen(mac_bt_D));
+                    memcpy(mac_bt_D, first_split,strlen(first_split));
+                    //mac_bt_D[strlen(first_split)]='\0';
+                    _flag_D_in = WICED_TRUE;            /* Bandera para que solo entre una vez */
+                    _flag_driver = WICED_TRUE;          /* Activar el sonido */
+                }
+                break;
+            default:
+                break;
             }
-
-                _flag_driver = WICED_TRUE;
-          }
+            first_split = strtok(NULL,_split_tama_2);
+            x++;
+        }
+    }
     wiced_rtos_set_semaphore(&displaySemaphore);
 
 }
