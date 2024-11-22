@@ -445,14 +445,14 @@ static wiced_result_t guardian_V2( void ){
         }
     last_count_l=count_l;
 
-//    if(_flag_driver == WICED_TRUE)
-//            {
-//            printf("\n *** Sound driver *** \n");
-//            buzz(200,2);
-//            _flag_driver = WICED_FALSE;
-//            }
-
+    if(_flag_driver == WICED_TRUE)
+    {
+        printf("\n *** Sound driver *** \n");
+        buzz(200,2);
+        _flag_driver = WICED_FALSE;
     }
+
+}
 
 /*************** Timer to publish weather data every 30sec ***************/
 

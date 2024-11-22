@@ -281,6 +281,15 @@ void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,cha
 //         u8g_DrawLine(u8g, 72,7,67,4);
 //         u8g_DrawBox(u8g, 63,8,3,3);
 //     }
+
+     /* Conductor agregado */
+        if(_flag_D_in == WICED_TRUE )
+        {
+            u8g_SetFont(u8g, u8g_font_gdr10);
+            u8g_SetFontPosTop(u8g);
+            u8g_DrawStr(u8g,110,0,"C");
+        }
+
      u8g_SetFont(u8g, u8g_font_gdr10);
       u8g_SetFontPosTop(u8g);
 
