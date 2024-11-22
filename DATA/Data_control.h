@@ -131,7 +131,7 @@ struct Acarreos
 
 };
 
-//char mac_bt_D[19]; /* Variable used in the driver identificator */
+char mac_bt_D[19]; /* Variable used in the driver identificator */
 void tamagochi(char *input,struct Acarreos *acareo){
     int x=0;
     unsigned char str_split[128];
@@ -222,46 +222,46 @@ void tamagochi(char *input,struct Acarreos *acareo){
             second_split=strtok(NULL,_split_tama_2);
         }
     }
-//    else if(strstr(input,_N_KDV))
-//        {
-//            memcpy(str_split,input,strlen(input));
-//            //printf("\n Copio %s\n",str_split);
-//
-//            char * first_split;
-//
-//            first_split=strtok(str_split,_split_tama_2);
-//
-//            while(first_split !=NULL)
-//            {
-//                switch(x)
-//                {
-//                case 0:
-//                    /* No hago nada */
-//                    break;
-//                case 1:
-//                    if(strstr(input ,_NONE))
-//                    {
-//                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-//                    }
-//                    else
-//                    {
-//                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
-//                        //memcpy(mac_bt_D, first_split,strlen(first_split));
-//                        memcpy(mac_bt_D, first_split,strlen(first_split));
-//                        mac_bt_D[strlen(first_split)]='\0';
-//                        printf("\n %s \n",mac_bt_D);
-//                    }
-//
-//                    break;
-//                    default:
-//                        break;
-//                }
-//                first_split = strtok(NULL,_split_tama_2);
-//                x++;
-//            }
-//
-//                _flag_driver = WICED_TRUE;
-//          }
+    else if(strstr(input,_N_KDV))
+        {
+            memcpy(str_split,input,strlen(input));
+            //printf("\n Copio %s\n",str_split);
+
+            char * first_split;
+
+            first_split=strtok(str_split,_split_tama_2);
+
+            while(first_split !=NULL)
+            {
+                switch(x)
+                {
+                case 0:
+                    /* No hago nada */
+                    break;
+                case 1:
+                    if(strstr(input ,_NONE))
+                    {
+                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
+                    }
+                    else
+                    {
+                        memset(mac_bt_D,'\0',strlen(mac_bt_D));
+                        //memcpy(mac_bt_D, first_split,strlen(first_split));
+                        memcpy(mac_bt_D, first_split,strlen(first_split));
+                        mac_bt_D[strlen(first_split)]='\0';
+                        printf("\n %s \n",mac_bt_D);
+                    }
+
+                    break;
+                    default:
+                        break;
+                }
+                first_split = strtok(NULL,_split_tama_2);
+                x++;
+            }
+
+                _flag_driver = WICED_TRUE;
+          }
     wiced_rtos_set_semaphore(&displaySemaphore);
 
 }

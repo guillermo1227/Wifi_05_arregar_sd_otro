@@ -14,13 +14,13 @@
  *
  * --> Si no cuenta con conexion a internet se reinicia a el 2:20 segudnso aprox
  * --> pruebas de reinicos pasada con exito
- * --> Cuanta con acarreos
+ * --> Cuanta con acarreos para modificar Ivan
  * --> Baudios 230400
  * --> Conexion por DHCP desde codigo
  * --> Si se reinicia vuelve a sonar
- * --> mejora de datos enviados en la trama B;
+ * --> mejora de datos enviados en la trama B;, ademas si se desconecta de internet no almacenas los datos de Gateway, los borra
  * --> conexion con wifi solo manda 2 veces un acarreo hecho o 2 veces localizacion por beacons
- * --> Fecha 05/06/2024 */
+ * --> Fecha 22/11/2024 */
 
 
 
@@ -268,10 +268,10 @@ void application_start( ){
 //                  Set_IP("-C10.174.104.5",16,WICED_UART_3);
 //                  Set_config();
 
-//                  Set_SSID("-SCSM-MONITOREO",20,WICED_UART_3);
-//                  Set_KEY("-KM0n1t0r30#21",20,WICED_UART_3);
-//                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
-//                  Set_config();
+                  Set_SSID("-SCSM-MONITOREO",20,WICED_UART_3);
+                  Set_KEY("-KM0n1t0r30#21",20,WICED_UART_3);
+                  Set_SERVER("-I10.90.120.10",17,WICED_UART_3);
+                  Set_config();
 
                   net_config();
                   break;

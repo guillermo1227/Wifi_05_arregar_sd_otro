@@ -451,104 +451,128 @@ void publishThread(wiced_thread_arg_t arg)
     }
 }
 
-void data_bt_send(unsigned char* buffer_in ){
+void data_bt_send(unsigned char* buffer_in ){  /* Gateway */
     Data_B_in = WICED_FALSE;
+
     unsigned char str_switch[4];
-       unsigned char str_split[128];
+    unsigned char str_split[128];
 
-       strncpy(str_switch,buffer_in,4);
-       strcpy(str_split,&buffer_in[4]);
 
-       char delim[] = ",";     //establece como  realizara el split
-       int x=0;
-    if(strstr(str_switch,"BNM|")){// && (Fill_Erase_B == WICED_FALSE)){
-            if(s_count_x==limit_data){
-                data_send_bt=s_count_x;
-            }
-            else if(s_count_x<limit_data){
+    strncpy(str_switch,buffer_in,4);
+    strcpy(str_split,&buffer_in[4]);
 
-                unsigned char *cvl1 = strtok(str_split, delim);
-                while(cvl1 != NULL)
-                {
-                    switch (x) {
-                    case 0:
-                        //memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
-                        if(strstr(cvl1,"|"))
+    char delim[] = ",";     //establece como  realizara el split
+    int x=0;
+    printf("Si eta en on_conection para Gateway  Esto vale try_n = %d\n",try_n);
+    //if((try_n <= 10) && (conetion_wifi == WICED_TRUE))
+    if(_wifi_status == WICED_TRUE)
+    {
+        if(strstr(str_switch,"BNM|"))
+            {
+                if(s_count_x==limit_data){
+                    data_send_bt=s_count_x;
+                }
+                else if(s_count_x<limit_data){
+
+                    unsigned char *cvl1 = strtok(str_split, delim);
+                    while(cvl1 != NULL)
+                    {
+                        switch (x) {
+                        case 0:
+                            //memcpy(data_btt[s_count_x+1].mac_bt,cvl1,17);
+                            if(strstr(cvl1,"|"))
+                            {
+                                bad_value = 1;
+                            }
+                            else
+                            {
+                                memcpy(data_B.mac_bt,cvl1,17);   /* Copy the mac, after will compare to verify if is insede of the struct */
+                            }
+                            break;
+                        case 1:
+                            if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHI"))){
+                                strcpy(data_btt[s_count_x+1].type,"LAMP");
+                            }
+                            else if(strstr(buffer_in,"BEAC")){
+                                strcpy(data_btt[s_count_x+1].type,"BEAC");
+                                //strcpy(data_B.type,"BEAC");
+                                GEOSF_F=WICED_TRUE;
+                                //printf("\n **** BEACON ACARO **** \n");
+                            }
+                            else{
+                                strcpy(data_btt[s_count_x+1].type,"BEAC"); //GEOSF y lo restante
+                                //strcpy(data_B.type,"BEAC");
+                            }
+                            break;
+                        case 2:
+                            strcpy(data_btt[s_count_x+1].rssi,cvl1);
+                            //strcpy(data_B.rssi,cvl1);
+                            break;
+                        case 3:
+                            strcpy(data_btt[s_count_x+1].fallen,cvl1);
+                            //strcpy(data_B.fallen,cvl1);
+                            break;
+                        default:
+                            break;
+                        }
+                        x++;
+                        cvl1=strtok(NULL, delim);
+                    }
+                    x=0;
+
+                    if(bad_value != 1)
+                    {
+                        int in_v=0;
+                        for(int i=0; i<s_count_x;i++)
                         {
-                            bad_value = 1;
+                            if(strstr(data_btt[i+1].mac_bt,data_B.mac_bt) ||
+                                    strstr(data_btt[i+1].mac_bt,data_B.mac_bt))
+                            {
+                                Data_B_in = WICED_TRUE;
+                                in_v = i+1;     /* Keep the position that was detect */
+                                break;
+                            }
+                        }
+
+                        if(Data_B_in == WICED_FALSE)    /* Save vehicule mac */
+                        {
+                            //memcpy(data_btt[s_count_x+1].rssi,data_B.rssi,4); /* Only update the RSSI value */
+                            memcpy(data_btt[s_count_x+1].mac_bt,data_B.mac_bt,17);
+                            s_count_x++;
+                            data_send_bt=s_count_x;
                         }
                         else
                         {
-                            memcpy(data_B.mac_bt,cvl1,17);   /* Copy the mac, after will compare to verify if is insede of the struct */
+                            //sprintf(data_btt[in_v].rssi,"R%s",data_btt[s_count_x+1].rssi);
+                            memcpy(data_btt[in_v].rssi,data_btt[s_count_x+1].rssi,4); /* Only update the RSSI value */
+
                         }
-                        break;
-                    case 1:
-                        if(strstr(buffer_in,"LAMP")||(strstr(buffer_in,"VEHI"))){
-                            strcpy(data_btt[s_count_x+1].type,"LAMP");
-                        }
-                        else if(strstr(buffer_in,"BEAC")){
-                            strcpy(data_btt[s_count_x+1].type,"BEAC");
-                            //strcpy(data_B.type,"BEAC");
-                            GEOSF_F=WICED_TRUE;
-                            //printf("\n **** BEACON ACARO **** \n");
-                        }
-                        else{
-                            strcpy(data_btt[s_count_x+1].type,"BEAC"); //GEOSF y lo restante
-                            //strcpy(data_B.type,"BEAC");
-                        }
-                        break;
-                    case 2:
-                        strcpy(data_btt[s_count_x+1].rssi,cvl1);
-                        //strcpy(data_B.rssi,cvl1);
-                        break;
-                    case 3:
-                        strcpy(data_btt[s_count_x+1].fallen,cvl1);
-                        //strcpy(data_B.fallen,cvl1);
-                        break;
-                    default:
-                        break;
+                        /* ****************** */
                     }
-                    x++;
-                    cvl1=strtok(NULL, delim);
+                    memset(data_B.mac_bt,NULL,17);
+                    memset(data_B.type,NULL,17);
+                    memset(data_B.rssi,NULL,4);
+                    memset(data_B.fallen,NULL,2);
+                    bad_value = 0;
                 }
-                x=0;
-
-                if(bad_value != 1)
-                {
-                    int in_v=0;
-                    for(int i=0; i<s_count_x;i++)
-                    {
-                        if(strstr(data_btt[i+1].mac_bt,data_B.mac_bt) ||
-                                strstr(data_btt[i+1].mac_bt,data_B.mac_bt))
-                        {
-                            Data_B_in = WICED_TRUE;
-                            in_v = i+1;     /* Keep the position that was detect */
-                            break;
-                        }
-                    }
-
-                    if(Data_B_in == WICED_FALSE)    /* Save vehicule mac */
-                    {
-                        //memcpy(data_btt[s_count_x+1].rssi,data_B.rssi,4); /* Only update the RSSI value */
-                        memcpy(data_btt[s_count_x+1].mac_bt,data_B.mac_bt,17);
-                        s_count_x++;
-                        data_send_bt=s_count_x;
-                    }
-                    else
-                    {
-                        //sprintf(data_btt[in_v].rssi,"R%s",data_btt[s_count_x+1].rssi);
-                        memcpy(data_btt[in_v].rssi,data_btt[s_count_x+1].rssi,4); /* Only update the RSSI value */
-
-                    }
-                    /* ****************** */
-                }
-                memset(data_B.mac_bt,NULL,17);
-                memset(data_B.type,NULL,17);
-                memset(data_B.rssi,NULL,4);
-                memset(data_B.fallen,NULL,2);
-                bad_value = 0;
             }
     }
+    else
+    {
+        printf("WARNING ERROR 2********\n");
+        if(s_count_x != 0)
+        {
+            for(uint8_t i=0; i<s_count_x;i++)
+            {
+                memcpy(data_btt[i].mac_bt,NULL,17);
+                memcpy(data_btt[i].type,NULL,17);
+                memcpy(data_btt[i].rssi,NULL,4);
+                memcpy(data_btt[i].fallen,NULL,2);
+            }
+            s_count_x=0;
+        }
+    }
+
 
     wiced_rtos_set_semaphore(&displaySemaphore);
 

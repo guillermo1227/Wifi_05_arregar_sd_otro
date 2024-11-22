@@ -23,7 +23,7 @@ uint8_t count_stream=0;
 /* Thread to publish data to the cloud */
 
 void Main_Thread_TCP(wiced_thread_arg_t arg){
-    uint8_t  key=2;
+    uint8_t  key=1;
 
     uint8_t _send_file;
 
@@ -37,7 +37,8 @@ void Main_Thread_TCP(wiced_thread_arg_t arg){
             case 1:
 //                tcp_file_sys();
 //                send_request_date();
-                //key=tcp_client_aca();
+
+                key=tcp_client_aca();
                 break;
 
             #ifdef GEOLOC
@@ -360,6 +361,12 @@ int tcp_gateway( void ){
               }
               /* <----------------------> */
 
+              sprintf(data_out,"C;{\"Vehicle\":\"%s\",\"AP\":\"%s\",\"Operator\":\"%s\"}\n",&mac_wifi,&mac_ap,&mac_bt_D);
+              result=wiced_tcp_stream_write(&stream, data_out, strlen(data_out));
+              if(result==WICED_TCPIP_SUCCESS){
+                  send_data_task=WICED_TRUE;
+              }
+
               memset(data_out,NULL,1000);
 //              key=1;
         wiced_tcp_stream_flush(&stream);
@@ -379,7 +386,7 @@ int tcp_gateway( void ){
         else if(_machine_flag == WICED_TRUE)
         {
             printf("****Voy a ver que mandaron\n");
-            return 2;
+            return 1;
         }
         else
         {
@@ -511,9 +518,10 @@ int tcp_client_aca( )
   //
 
 
-
-          if(_machine_flag == WICED_FALSE)
+          static uint8_t inter1=0;
+          if(inter1 < 2)
           {
+              inter1++;
               coun=read_data(ACARREO_ROOT,date_get(&i2c_rtc),&fs_handle);
               /* get the first token */
               token = strtok(filebuf, s);

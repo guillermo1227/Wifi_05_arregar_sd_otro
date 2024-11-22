@@ -38,7 +38,7 @@ wiced_bool_t tcp_down_connect=WICED_FALSE;
 //#include "NET/manager_tcp_client_vh.h"
 
 #define buff_aux    100
-#define buff_aux_4    5
+#define buff_aux_4    7
 #define filter_size     15
 
 static wiced_thread_t UART_M3;
@@ -193,9 +193,9 @@ void main_uart(wiced_thread_arg_t arg){
 //                    get_join_macbt(rx_buffer3);
 //                    collision_event_macbt(rx_buffer3);
 //                    collision_event_beacon(rx_buffer3);
-                    data_bt_send(rx_buffer3);                   /* Acomodo datos para karim */
+                    data_bt_send(rx_buffer3);                   /* Acomodo datos para karim Gateway*/
 
-                    //tamagochi(rx_buffer3,&log_accarreos);
+                    tamagochi(rx_buffer3,&log_accarreos);
 //                    limit_log=id_revived(rx_buffer3);
 
                     memset(&rx_buffer3,'\0',RX_BUFFER_SIZE);
@@ -297,7 +297,7 @@ void data_file_write(unsigned char* buffer_in ){      /* Funcion donde se llenan
                                             strcpy(AUX_BEACON[i].time_start,time_get(&i2c_rtc));
                                             //printf("OK BEAC GEOSF\n");
                                             printf("\n Variable para flujo de lo guardado de GEOSF %d\n",i);
-                                            count_beacon=+1;
+                                            //count_beacon=+1;
                                         }
                                         break;
                                     }
