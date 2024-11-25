@@ -51,7 +51,14 @@ uint8_t oled_things=1;
 
 wiced_bool_t First_one=WICED_FALSE;
 
+enum control_port {
+    No_carry,
+    transmit_carry,
+    end_transmit_carry,
+    leav_carry
+};
 
+uint8_t proccess_port = 0;
 
 #define _BACK       "B"
 #define _FRONT      "F"
@@ -130,107 +137,110 @@ void displayThread(wiced_thread_arg_t arg)
 //                Frsit_r=WICED_TRUE;
 //        }
 
-        if((fallen_f==WICED_TRUE)&&(First_one==WICED_TRUE)){
-            fallen_f=WICED_FALSE;
-            First_one=WICED_FALSE;
-            oled_things=2;
-        }
-        else if ((risk_z==WICED_TRUE)&&(First_one==WICED_TRUE)){
-            risk_z=WICED_FALSE;
-            First_one=WICED_FALSE;
-            oled_things=3;
-        }
-        else if((Evacaution==WICED_TRUE)&&(First_one==WICED_TRUE)){
-            Evacaution=WICED_FALSE;
-            First_one=WICED_FALSE;
-            oled_things=4;
-        }
-        else if((_flag_aca==WICED_TRUE)){
-            First_one=WICED_FALSE;
-            _flag_aca=WICED_FALSE;
-            oled_things=5;
-        }
-        else if((_B_transit==WICED_TRUE)&&(First_one==WICED_TRUE)){
-             First_one=WICED_FALSE;
-             _B_transit=WICED_FALSE;
-             oled_things=6;
-         }
-        else if ((Evacaution==WICED_FALSE)&&(risk_z==WICED_FALSE)&&(fallen_f==WICED_FALSE)&&(First_one==WICED_TRUE)&&(_flag_aca==WICED_FALSE)) {
-            First_one=WICED_FALSE;
-            oled_things=1;
-        }
+        if(proccess_port != transmit_carry)
+        {
+            if((fallen_f==WICED_TRUE)&&(First_one==WICED_TRUE)){
+                fallen_f=WICED_FALSE;
+                First_one=WICED_FALSE;
+                oled_things=2;
+            }
+            else if ((risk_z==WICED_TRUE)&&(First_one==WICED_TRUE)){
+                risk_z=WICED_FALSE;
+                First_one=WICED_FALSE;
+                oled_things=3;
+            }
+            else if((Evacaution==WICED_TRUE)&&(First_one==WICED_TRUE)){
+                Evacaution=WICED_FALSE;
+                First_one=WICED_FALSE;
+                oled_things=4;
+            }
+            else if((_flag_aca==WICED_TRUE)){
+                First_one=WICED_FALSE;
+                _flag_aca=WICED_FALSE;
+                oled_things=5;
+            }
+            else if((_B_transit==WICED_TRUE)&&(First_one==WICED_TRUE)){
+                 First_one=WICED_FALSE;
+                 _B_transit=WICED_FALSE;
+                 oled_things=6;
+             }
+            else if ((Evacaution==WICED_FALSE)&&(risk_z==WICED_FALSE)&&(fallen_f==WICED_FALSE)&&(First_one==WICED_TRUE)&&(_flag_aca==WICED_FALSE)) {
+                First_one=WICED_FALSE;
+                oled_things=1;
+            }
 
-        sprintf(lamp,"%d",count_l);
-        sprintf(veh,"%d",count_v);
+            sprintf(lamp,"%d",count_l);
+            sprintf(veh,"%d",count_v);
 
-        /* Send data to the display */
-        u8g_FirstPage(&display);
-        wiced_rtos_lock_mutex(&i2cMutex);
-        do {
-            coun_lcd=coun_lcd+1;
-            refresh_oled=refresh_oled+1;
+            /* Send data to the display */
+            u8g_FirstPage(&display);
+            wiced_rtos_lock_mutex(&i2cMutex);
+            do {
+                coun_lcd=coun_lcd+1;
+                refresh_oled=refresh_oled+1;
 
-//            Set_Warning(&display,coun_lcd,"  ",&lamp,&veh,WICED_FALSE);
-            if(frist_seen_silent==WICED_TRUE){
-               if((silent==WICED_TRUE)){
-                   Set_Warning(&display,coun_lcd,SOUND_OFF,&lamp,&veh,3);
-               }
-               else{
-                   Set_Warning(&display,coun_lcd,SOUND_ON,&lamp,&veh,3);
-               }
-               if (coun_lcd==(C_OLED*2)){
-//                   int_lcd();
-                   frist_seen_silent=WICED_FALSE;
-                   coun_lcd=0;
-                   oled_things=1;
-               }
+    //            Set_Warning(&display,coun_lcd,"  ",&lamp,&veh,WICED_FALSE);
+                if(frist_seen_silent==WICED_TRUE){
+                   if((silent==WICED_TRUE)){
+                       Set_Warning(&display,coun_lcd,SOUND_OFF,&lamp,&veh,3);
+                   }
+                   else{
+                       Set_Warning(&display,coun_lcd,SOUND_ON,&lamp,&veh,3);
+                   }
+                   if (coun_lcd==(C_OLED*2)){
+    //                   int_lcd();
+                       frist_seen_silent=WICED_FALSE;
+                       coun_lcd=0;
+                       oled_things=1;
+                   }
 
-            }else{
+                }else{
 
-                switch(oled_things){
-                case 1:
-                    Set_Warning(&display,coun_lcd," ",&lamp,&veh,WICED_FALSE);
-                    break;
-                case 2:
-                    Set_Warning(&display,coun_lcd,FALLEN_MAN,&lamp,&veh,WICED_TRUE);
-                    break;
-                case 3:
-                    Set_Warning(&display,coun_lcd,RISK_ZONE,&lamp,&veh,WICED_TRUE);
-                    break;
-                case 4:
-                    Set_Warning(&display,coun_lcd,"Evacuati",&lamp,&veh,WICED_TRUE);
-                    break;
-                case 5:
-                    Set_Warning(&display,coun_lcd,&log_accarreos.name,&lamp,&veh,WICED_TRUE);
-                    break;
-                case 6:
-                    Set_Warning(&display,coun_lcd,TRANSIT,&lamp,&veh,WICED_TRUE);
-                    break;
+                    switch(oled_things){
+                    case 1:
+                        Set_Warning(&display,coun_lcd," ",&lamp,&veh,WICED_FALSE);
+                        break;
+                    case 2:
+                        Set_Warning(&display,coun_lcd,FALLEN_MAN,&lamp,&veh,WICED_TRUE);
+                        break;
+                    case 3:
+                        Set_Warning(&display,coun_lcd,RISK_ZONE,&lamp,&veh,WICED_TRUE);
+                        break;
+                    case 4:
+                        Set_Warning(&display,coun_lcd,"Evacuati",&lamp,&veh,WICED_TRUE);
+                        break;
+                    case 5:
+                        Set_Warning(&display,coun_lcd,&log_accarreos.name,&lamp,&veh,WICED_TRUE);
+                        break;
+                    case 6:
+                        Set_Warning(&display,coun_lcd,TRANSIT,&lamp,&veh,WICED_TRUE);
+                        break;
+                    }
                 }
-            }
 
 
 
 
-            if (coun_lcd==(C_OLED*2)){
-                  coun_lcd=0;
-//                  int_lcd();
-                  oled_things=1;
-                  First_one=WICED_TRUE;
-               }
+                if (coun_lcd==(C_OLED*2)){
+                      coun_lcd=0;
+    //                  int_lcd();
+                      oled_things=1;
+                      First_one=WICED_TRUE;
+                   }
 
-            if((refresh_oled==100)||(flag_lcd_timer==WICED_TRUE)){
-                refresh_oled=0;
-//                int_lcd();
-                flag_lcd_timer=WICED_FALSE;
+                if((refresh_oled==100)||(flag_lcd_timer==WICED_TRUE)){
+                    refresh_oled=0;
+    //                int_lcd();
+                    flag_lcd_timer=WICED_FALSE;
 
-            }
-
-
-        } while (u8g_NextPage(&display));
+                }
 
 
-        wiced_rtos_unlock_mutex(&i2cMutex);
+            } while (u8g_NextPage(&display));
+
+
+            wiced_rtos_unlock_mutex(&i2cMutex);
+        }
     }
 }
 #define a 2
@@ -289,6 +299,35 @@ void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,cha
             u8g_SetFontPosTop(u8g);
             u8g_DrawStr(u8g,110,0,"C");
         }
+
+        //Control de variable de vibración
+            if(_flag_vibration == WICED_TRUE )
+            {
+              u8g_SetFont(u8g, u8g_font_gdr10);
+              u8g_SetFontPosTop(u8g);
+
+        //      switch(log_accarreos.acarreo_event)
+              switch(2)
+              {
+              // Para los casos 1 al 21 (Acarreo)
+              case 1:
+                  u8g_DrawStr(u8g,0,0,"AC");
+                  break;
+              // Para los casos 22 al 34 (Parado)
+              case 2:
+                  u8g_DrawStr(u8g,0,0,"PA");
+                  break;
+              //Para los casos del 35 al 45 (Tránsito)
+              case 3:
+                  u8g_DrawStr(u8g,0,0,"TR");
+                  break;
+              default:
+                  break;
+              }
+
+              //Apaga bandera de vibración
+             // _flag_vibration = WICED_FALSE;
+            }
 
      u8g_SetFont(u8g, u8g_font_gdr10);
       u8g_SetFontPosTop(u8g);
@@ -387,7 +426,6 @@ void Set_Warning(u8g_t* u8g,uint8_t count,unsigned char* buffer_in,char* c_l,cha
           u8g_DrawStr(u8g, 2, 19,  eva);
        }
     }
-
 
 }
 

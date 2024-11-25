@@ -22,6 +22,9 @@
 #include "stdio.h"
 #include "stdlib.h"
 
+volatile wiced_bool_t _flag_vibration = WICED_FALSE;   //Bandera de evento de vibración
+volatile wiced_bool_t _flag_start_accgyro = WICED_FALSE; //Bandera para comenzar funcionalidad ACCGYRO
+
 wiced_bool_t _B_transit=WICED_FALSE;
 wiced_bool_t fallen_f =WICED_FALSE;
 wiced_bool_t risk_z=WICED_FALSE;
@@ -105,6 +108,7 @@ struct tempo_collision{
 
 #define ID_name_beacon "NBC#"
 #define ID_acarreo  "CAR#"
+#define ID_fin_acarreo "NOC#"
 #define _MSG_TEST   "CAR#11:00:33:44:55:66|4\0"
 #define _MSG_TEST2  "BNM|BC:57:29:00:2E:DB,GEOSF,-95,0"
 #define _N_KDV      "KDV"
@@ -169,11 +173,11 @@ void tamagochi(char *input,struct Acarreos *acareo){
             case 1:
                 /* code */
                 acareo->type=atoi(second_split);
-//                switch(acareo->type){
-//                case 1:
-//
-//                    break;
-//                }
+
+                //Si el tipo de acarreo es carga o descarga, levanta bandera de acelerómetro
+                if(acareo->type == 2 || acareo->type == 3)
+                    _flag_start_accgyro = WICED_TRUE;
+
                 break;
             case 2:
                 /* code */
@@ -260,8 +264,11 @@ void tamagochi(char *input,struct Acarreos *acareo){
             x++;
         }
     }
-    wiced_rtos_set_semaphore(&displaySemaphore);
+    else if(strstr(input,ID_fin_acarreo))
+            _flag_start_accgyro = WICED_FALSE;
 
+
+    wiced_rtos_set_semaphore(&displaySemaphore);
 }
 
 void split_reader(unsigned char* buffer_in){

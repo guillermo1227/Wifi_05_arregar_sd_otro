@@ -44,6 +44,7 @@ static wiced_timed_event_t sound_dog;
 
 static wiced_timed_event_t Beacon_guardian;
 static wiced_timed_event_t Geo_guardian;
+static wiced_timed_event_t Geosf_guardian;
 
 static wiced_timed_event_t Collision_guardian;
 static wiced_timed_event_t Pantalla_guardian;   /* Watchdog */
@@ -65,6 +66,7 @@ void publish30sec(void* arg);
 static wiced_result_t Beacon_V( void );
 static wiced_result_t Collision_V( void );
 static wiced_result_t Acarreo_V( void );
+static wiced_result_t Geosf_V( void );
 
 static wiced_result_t Pantalla_T( void );   /* Watchdog */
 void start_whatchdog_LCD(void);      /* Watchdog */
@@ -92,7 +94,9 @@ void init_all_timer(){
         wiced_rtos_register_timed_event( &guardian, WICED_NETWORKING_WORKER_THREAD, &guardian_v, 1200, 0 );
         wiced_rtos_register_timed_event( &guardian2, WICED_NETWORKING_WORKER_THREAD, &guardian_V2, 1000, 0 );
         wiced_rtos_register_timed_event( &Geo_guardian, WICED_NETWORKING_WORKER_THREAD, &Beacon_V, 2100, 0 );       /* HE; */
-        wiced_rtos_register_timed_event( &Beacon_guardian, WICED_NETWORKING_WORKER_THREAD, &Acarreo_V, 4500, 0 );   /* HVT */
+        wiced_rtos_register_timed_event( &Geosf_guardian, WICED_NETWORKING_WORKER_THREAD, &Geosf_V, 4500, 0 );
+
+        wiced_rtos_register_timed_event( &Beacon_guardian, WICED_NETWORKING_WORKER_THREAD, &Acarreo_V, 1100, 0 );   /* HVT */
 
 //        wiced_rtos_create_thread(&ThreadHandle_W, THREAD_BASE_PRIORITY+5, "WIFI", SearchWifi, THREAD_STACK_SIZE, NULL);
 
@@ -108,15 +112,42 @@ start_whatchdog_LCD(void)   /* Watchdog */
     wiced_rtos_register_timed_event( &Pantalla_guardian, WICED_NETWORKING_WORKER_THREAD, &Pantalla_T,4000, 0 );   /* Verificar el funcionamiento de la pantalla */
 }
 
+//Función que controla GEOSF
+static wiced_result_t Geosf_V( void )
+{
+    if((Product_f==WICED_TRUE)&&(GEOSF_F==WICED_TRUE)){
+         Product_f=WICED_FALSE;
+         GEOSF_F=WICED_FALSE;
+
+         buzz(200,0);
+         printf("prendio");
+     }
+    else if((Product_f==WICED_FALSE)&&(GEOSF_F==WICED_FALSE)){
+        Product_f=WICED_TRUE;
+        printf("no prendio nada\n");
+
+    }
+    printf("\t%d\t%d\n",Product_f,GEOSF_F);
+    GEOSF_F=WICED_FALSE;
+}
+
 static wiced_result_t Acarreo_V( void ){    /* Acarreos HVT */
 
     if((_wifi_status == WICED_TRUE) || (_wifi_status == WICED_TRUE))
     {
-        if(strlen(log_accarreos.mac_bt)!=0)
+//        if(strlen(log_accarreos.mac_bt)!=0)
+        //Entra si hay un beacon de acarreco cerca (carga o descarga)
+        if(_flag_start_accgyro == WICED_TRUE)
         {  /* Si se ingreso una mac entra aqui */
 //            wiced_filesystem_unmount(&fs_handle);
 //            init_sd(&fs_handle);
 //            read_data(ACARREO_ROOT,date_get(&i2c_rtc),&fs_handle);
+
+            proccess_port = WICED_TRUE;
+            _flag_vibration = WICED_TRUE;   //Bandera de evento de vibración
+            wiced_rtos_delay_milliseconds(500);
+            proccess_port = WICED_FALSE;
+
 
             strcpy(log_accarreos.id,"700");
             //log_accarreos.id[strlen(id_count)]='\0';
@@ -140,8 +171,16 @@ static wiced_result_t Acarreo_V( void ){    /* Acarreos HVT */
     }
     else if((_wifi_status == WICED_FALSE) || (_wifi_status == WICED_FALSE))
     {
-        if(strlen(log_accarreos.mac_bt)!=0)
-        {  /* Si se ingreso una mac entra aqui */
+//        if(strlen(log_accarreos.mac_bt)!=0)
+        //Entra si hay un beacon de acarreco cerca (carga o descarga)
+        if(_flag_start_accgyro == WICED_TRUE)
+        {
+            proccess_port = WICED_TRUE;
+            wiced_rtos_delay_milliseconds(500);
+            _flag_vibration = WICED_TRUE;   //Bandera de evento de vibración
+            proccess_port = WICED_FALSE;
+
+            /* Si se ingreso una mac entra aqui */
             wiced_filesystem_unmount(&fs_handle);
             init_sd(&fs_handle);
 
@@ -163,27 +202,6 @@ static wiced_result_t Acarreo_V( void ){    /* Acarreos HVT */
             }
         }
     }
-
-    if((Product_f==WICED_TRUE)&&(GEOSF_F==WICED_TRUE)){
-         Product_f=WICED_FALSE;
-         GEOSF_F=WICED_FALSE;
-
-         buzz(200,0);
-         printf("prendio");
-     }
-    else if((Product_f==WICED_FALSE)&&(GEOSF_F==WICED_FALSE)){
-        Product_f=WICED_TRUE;
-        printf("no prendio nada\n");
-
-    }
-    printf("\t%d\t%d\n",Product_f,GEOSF_F);
-    GEOSF_F=WICED_FALSE;
-
-
-
-
-
-
 }
 
 
